@@ -4,6 +4,19 @@ FROM node:alpine AS base
 FROM base AS builder
 WORKDIR /app
 
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json ./
+RUN npm ci
+# Copy sources
+COPY . .
+# Disable Next.js telemetry
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build
+
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
@@ -12,12 +25,12 @@ RUN addgroup --system --gid 1001 nodejs && \
     mkdir .next && \
     chown nextjs:nodejs .next
 
-COPY ./public ./public
+COPY --from=builder /app/public ./public
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --chown=nextjs:nodejs .next/standalone ./
-COPY --chown=nextjs:nodejs .next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
