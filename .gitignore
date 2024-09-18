@@ -1,0 +1,16 @@
+# env files
+.env*
+# Node modules
+node_modules/
+# Next.js
+.next/
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+# Serwist
+public/sw*
+public/swe-worker*
+# Typedoc
+docs/

@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the code from your repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Step 2: Set up SSH
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+    # Step 3: Deploy via SSH
+    - name: Deploy application via SSH
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} << 'EOF'
+          # Navigate to the app directory (or clone it if it doesn't exist)
+          if [ ! -d "/home/${{ secrets.DEPLOY_USER }}/blockchain-frontend" ]; then
+            git clone https://github.com/Natixar/blockchain-frontend.git /home/${{ secrets.DEPLOY_USER }}/
+          fi
+
+          # Pull the latest changes
+          cd /home/${{ secrets.DEPLOY_USER }}/blockchain-frontend
+          git pull origin main
+
+          # Build and run the Docker container
+          docker build -t blockchain-frontend:latest .
+          docker stop blockchain-frontend || true
+          docker rm blockchain-frontend || true
+          docker run -d --name blockchain-frontend -p 3024:3000 blockchain-frontend:latest
+
+          # Optional: Clean up dangling images
+          docker image prune -f
+        EOF
