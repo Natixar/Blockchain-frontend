@@ -1,0 +1,71 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Auto-deploy on push to main branch
+  pull_request:
+    branches:
+      - main  # Run tests on PR to main
+  workflow_dispatch:  # Manual trigger for deployment
+
+jobs:
+  test:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 3: Install Playwright browsers
+      - name: Install Playwright browsers
+        run: npx playwright install
+
+      # Step 4: Run tests
+      - name: Run Playwright tests
+        run: npx playwright test
+
+  deploy:
+    name: Deploy Application
+    needs: test  # Ensure that the test job passes before running deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from your repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Step 2: Set up SSH
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      # Step 3: Deploy via SSH
+      - name: Deploy application via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} << 'EOF'
+            # Navigate to the app directory (or clone it if it doesn't exist)
+            if [ ! -d "/home/${{ secrets.DEPLOY_USER }}/blockchain-frontend" ]; then
+              git clone https://github.com/Natixar/blockchain-frontend.git /home/${{ secrets.DEPLOY_USER }}/
+            fi
+
+            # Pull the latest changes
+            cd /home/${{ secrets.DEPLOY_USER }}/blockchain-frontend
+            git pull origin main
+
+            # Build and run the Docker container
+            docker build -t blockchain-frontend:latest .
+            docker stop blockchain-frontend || true
+            docker rm blockchain-frontend || true
+            docker run -d --name blockchain-frontend -p 3024:3000 blockchain-frontend:latest
+
+            # Optional: Clean up dangling images
+            docker image prune -f
+          EOF

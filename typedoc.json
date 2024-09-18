@@ -1,0 +1,20 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "./app"
+    ],
+    "entryPointStrategy": "expand", // Expand to include subdirectories
+    "out": "docs",
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.spec.ts"
+    ],
+    "excludeExternals": true,
+    "excludePrivate": false,
+    "includeVersion": true,
+    "visibilityFilters": {
+        "protected": true,
+        "private": true,
+        "inherited": true
+    }
+}
