@@ -10,7 +10,6 @@
  * - The form is only submitted if all required fields are correctly filled out, ensuring data integrity.
  * - The component is built using React hooks (`useState`, `useEffect`, `useRef`) and leverages Tailwind CSS for styling.
  * - Accessibility features include ARIA attributes and keyboard navigation for a better user experience.
- *
  * @module
  */
 

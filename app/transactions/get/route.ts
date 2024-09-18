@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles GET requests to retrieve a specific blockchain transaction associated with a given account and transaction address.
  * The transaction details are fetched by interacting with the blockchain.

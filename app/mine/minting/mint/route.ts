@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles POST requests to mint a product on the blockchain by invoking a blockchain function. The route validates the input for product data and account details before calling the blockchain minting function.
  * @module

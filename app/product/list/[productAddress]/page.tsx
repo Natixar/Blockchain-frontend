@@ -1,3 +1,13 @@
+/**
+ * This component displays the details of a specific blockchain product, including its name, quantity, CO2 emissions, and price.
+ * Users can view attached documents related to the product and upload new documents. The component also allows for the deletion 
+ * of existing documents. The uploaded files are hashed using SHA-256 before being added to the blockchain product.
+ * 
+ * The component manages state for product details, document uploads, error handling, and loading states. 
+ * It fetches product data based on the provided product address and interacts with the blockchain to manage documents.
+ * @module
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

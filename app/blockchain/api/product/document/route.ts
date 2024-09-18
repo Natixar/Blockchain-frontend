@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles POST, DELETE, and GET requests for managing documents related to a product on the blockchain.
  * It allows for adding, removing, and retrieving documents using the product address and document hashes.

@@ -6,7 +6,7 @@ import jsQR from 'jsqr';
 // Define a generic prop type for the QR code data
 /**
  * @interface ScannerProps<T>
- * @description Interface defining the props for the QRCodeScanner component.
+ * Interface defining the props for the QRCodeScanner component.
  * @template T - The type of data that will be returned when a QR code is successfully scanned.
  * @property {function} onScanComplete - A callback function triggered when the QR code scanning is complete, passing the scanned data as an argument.
  */
@@ -15,8 +15,7 @@ interface ScannerProps<T> {
 }
 
 /**
- * @function QRCodeScanner
- * @description A functional component that allows the user to scan QR codes using their device's camera. It uses the `jsQR` library to process the video stream and scan for QR codes.
+ * A functional component that allows the user to scan QR codes using their device's camera. It uses the `jsQR` library to process the video stream and scan for QR codes.
  * @template T - The type of data that will be returned after scanning a QR code. Defaults to `string`.
  * @param {ScannerProps<T>} props - The component props containing the `onScanComplete` callback function.
  * @returns A JSX element with a button to start scanning and a video element to display the camera feed.
@@ -27,8 +26,7 @@ export default function QRCodeScanner<T = string>({ onScanComplete }: ScannerPro
   const [isScanning, setIsScanning] = useState(false); // State to manage whether the scanning process is active
 
   /**
-   * @function startVideo
-   * @description Starts the video stream from the device's camera. If successful, the video stream will be displayed in the video element.
+   * Starts the video stream from the device's camera. If successful, the video stream will be displayed in the video element.
    */
   const startVideo = useCallback(async () => {
     const video = videoRef.current;
@@ -47,8 +45,7 @@ export default function QRCodeScanner<T = string>({ onScanComplete }: ScannerPro
   }, []);
 
   /**
-   * @function captureFrame
-   * @description Captures a single video frame, processes it using the `jsQR` library to detect a QR code, and attempts to parse the QR code data.
+   * Captures a single video frame, processes it using the `jsQR` library to detect a QR code, and attempts to parse the QR code data.
    */
   const captureFrame = useCallback(() => {
     const video = videoRef.current;
@@ -95,7 +92,7 @@ export default function QRCodeScanner<T = string>({ onScanComplete }: ScannerPro
   }, [onScanComplete]);
 
   /**
-   * @description Hook that starts the video stream and sets up the frame capture when scanning is enabled.
+   * Hook that starts the video stream and sets up the frame capture when scanning is enabled.
    */
   useEffect(() => {
     const video = videoRef.current;

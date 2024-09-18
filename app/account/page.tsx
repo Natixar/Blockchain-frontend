@@ -1,11 +1,16 @@
+/**
+ * This component allows users to update their account information, including their email address, password, 
+ * and first/last name. It includes validation for email and password input, and users must confirm their actions 
+ * before proceeding with sensitive changes such as updating the password.
+ * 
+ * The component manages state for user inputs, loading indicators, error messages, and success notifications. 
+ * It also includes a confirmation modal for password updates and provides feedback after each update.
+ * @module
+ */
 'use client';
 
 import { useState, ChangeEvent } from 'react';
 
-/**
- * Manage user account information.
- * @module
- */
 export default function ChangeUserInfoPage() {
   const [newEmail, setEmail] = useState('');
   const [password, setPassword] = useState('');

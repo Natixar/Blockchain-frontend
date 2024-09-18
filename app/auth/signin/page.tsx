@@ -1,3 +1,14 @@
+/**
+ * This component renders a "Login" page where users can enter their email and password to sign in. 
+ * Upon form submission, the `handleSignin` action is triggered to authenticate the user. 
+ * If there is an error (such as invalid credentials), an error message is displayed above the form.
+ * 
+ * The component includes form validation for both email and password inputs, 
+ * and provides a link to the "Forgot Password" page for users who need to reset their password.
+ * 
+ * @module
+ */
+
 import { handleSignin } from './signinAction';
 
 export const metadata = {

@@ -1,3 +1,12 @@
+/** 
+ * This page component renders a form for creating a new blockchain transaction.
+ * Users can select a product, specify the sender and recipient, choose a transporter, and input the quantity of the product.
+ * The form also supports unit conversion, and the transaction details are submitted to a backend API for processing.
+ * 
+ * The component manages state for the transaction details, products, groups, form validation, loading status, and error handling.
+ * @module
+ */
+
 'use client';
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';

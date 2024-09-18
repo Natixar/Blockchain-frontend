@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles GET requests to retrieve blockchain transactions related to a specific account.
  * The transactions are fetched by calling a blockchain function that interacts with the Natixar Factory contract.

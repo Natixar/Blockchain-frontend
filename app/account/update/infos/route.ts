@@ -1,16 +1,10 @@
 /**
- * @category API Routes
- * 
  * This route allows users to update their first and last names, validating the user through a JWT token provided by FusionAuth.
  * @module
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
-/**
- * @category API Routes
- */
 
 /**
  * Schema to validate user inputs, specifically first and last names.

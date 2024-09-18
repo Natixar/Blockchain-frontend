@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles POST requests to process transport emissions data. It validates input data, calculates transport emissions, generates a QR code, and sends an email with the results.
  * @module

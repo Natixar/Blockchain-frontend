@@ -1,3 +1,13 @@
+/**
+ * This component renders a unified product listing page where users can filter, sort, and view products.
+ * It allows users to filter products by name, quantity, and CO2 emission. Sorting options are available by name, quantity, or CO2, 
+ * with support for ascending and descending order. Users can also specify a range for quantity and CO2 emissions.
+ * 
+ * The component manages state for filtering, sorting, and range inputs, and it fetches product data based on user input.
+ * The data is displayed in a grid layout, where each product is clickable for further details.
+ * @module
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';

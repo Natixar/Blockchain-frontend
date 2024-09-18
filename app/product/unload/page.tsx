@@ -1,3 +1,15 @@
+/**
+ * This component renders a multi-step form for unloading a package on the blockchain. 
+ * The form involves scanning a QR code to fetch transaction details, reviewing the transport data, 
+ * and uploading relevant documents. Once all steps are completed, the user can submit the form to 
+ * finalize the unloading process.
+ * 
+ * The component manages state for the current step, transaction details, uploaded files, error handling, 
+ * loading indicators, and submission progress. Upon successful submission, the user is redirected to 
+ * a product listing page.
+ * @module
+ */
+
 'use client';
 
 import { useState } from 'react';

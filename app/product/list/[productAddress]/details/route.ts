@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles GET requests to retrieve specific product information from the blockchain using an account address and product address.
  * The product data includes details like price, quantity, and CO2 emissions.

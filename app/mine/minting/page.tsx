@@ -1,3 +1,14 @@
+/**
+ * This component renders a form for minting new minerals on the blockchain. 
+ * Users can select a mineral, specify the quantity, choose a unit (kg, metric ton, etc.), and input CO2 emissions for the minting process. 
+ * The form includes validation for the input fields and sends a request to the backend API to mint the selected mineral.
+ * 
+ * The component manages state for the minerals, selected product, quantity, unit, CO2 emissions, and form submission status. 
+ * It also handles form validation, loading indicators, and displays feedback messages for success or failure.
+ * 
+ * @module
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';

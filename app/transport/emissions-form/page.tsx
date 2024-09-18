@@ -1,3 +1,20 @@
+/** 
+ * This component renders a multi-step form for submitting transport data, 
+ * including load carried and documents for a transaction. It uses three steps:
+ * 1. Transport Data input.
+ * 2. Load Carried input.
+ * 3. Document Upload.
+ * 
+ * The component manages state for the current step, form data, file uploads, 
+ * errors, and submission status. It also generates and displays CO2 emissions 
+ * based on the submitted data, along with a QR code.
+ * 
+ * @param {Object} props - The component's props.
+ * @param {Object.<string, string|string[]|undefined>} props.searchParams - Search parameters passed to the form, including `transactionAddress` and `email`.
+ * 
+ * @module
+ */
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';

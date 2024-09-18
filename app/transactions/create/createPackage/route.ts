@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles POST requests to create a package on the blockchain without a transporter and send email notifications to the relevant parties.
  * It interacts with FusionAuth to retrieve email addresses associated with blockchain addresses, and uses SMTP to send transaction notifications.

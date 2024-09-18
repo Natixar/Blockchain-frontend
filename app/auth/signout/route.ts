@@ -1,6 +1,30 @@
+/** 
+ * This route handles user logout by clearing the authentication cookies (`access_token` and `refresh_token`) 
+ * and making a request to FusionAuth's Logout API. Upon successful logout, the user is redirected to the 
+ * sign-in page (`/auth/signin`).
+ * @module
+ */
+
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+/**
+ * @param {Request} request - The HTTP request object, which contains information about the incoming request, including the URL.
+ * @returns {Promise<NextResponse>} Redirects the user to the sign-in page after clearing cookies and attempting to log out from FusionAuth.
+ * 
+ * @example
+ * // Example usage of the GET request
+ * fetch('/auth/signout')
+ *  .then(response => {
+ *    if (response.ok) {
+ *      // Redirect to login or show confirmation
+ *    }
+ *  });
+ * 
+ * @throws {Error} Logs an error if the logout request to FusionAuth fails or if there are issues during the fetch operation.
+ * 
+ * @see {@link https://fusionauth.io/docs/v1/tech/apis/authentication/logout Logout API documentation}
+ */
 export async function GET(request: Request) {
   const redirectUrl = new URL('/auth/signin', request.url);
 

@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles GET requests to retrieve group information from FusionAuth.
  * The group details include the group name and associated blockchain address.

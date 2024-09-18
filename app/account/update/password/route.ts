@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This route allows users to change their password. The route validates the user through a JWT token provided by FusionAuth, then sends the new password and current password to FusionAuth's API for updating.
  * @module

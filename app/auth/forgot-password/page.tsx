@@ -1,3 +1,11 @@
+/**
+ * This component renders a "Forgot Password" page where users can request a password reset link by providing their email address.
+ * Upon form submission, the `handleForgotPassword` action is triggered to send the password reset link to the provided email.
+ * 
+ * The component includes form validation for the email input, and it displays a user-friendly interface with a reset button.
+ * @module
+ */
+
 import { handleForgotPassword } from './resetpwdAction';
 
 export const metadata = {

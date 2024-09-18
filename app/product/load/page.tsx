@@ -1,3 +1,15 @@
+/**
+ * This component renders a multi-step form for loading a package on the blockchain. 
+ * It begins by scanning a QR code to fetch transaction details, reviewing transport data, 
+ * and then uploading relevant documents. Once all steps are completed, the form is submitted 
+ * to load the package onto the blockchain.
+ * 
+ * The component manages state for the current step, transaction details, file uploads, 
+ * error handling, loading indicators, and submission progress. Upon successful submission, 
+ * the user is redirected to the product listing page.
+ * @module
+ */
+
 'use client';
 
 import { useState } from 'react';

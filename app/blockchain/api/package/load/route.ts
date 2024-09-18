@@ -1,5 +1,4 @@
 /**
- * @category API Routes
  * 
  * This API route handles POST requests to load a package on the blockchain, validating the necessary inputs and recording transport emissions data.
  * It uses the blockchain to register the transport emissions and completes the package loading process.

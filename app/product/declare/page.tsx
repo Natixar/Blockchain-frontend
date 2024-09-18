@@ -1,16 +1,15 @@
 /**
+ * This module renders the `DefineProductForm` page, allowing users to declare a new product type or select from predefined categories.
+ * The form supports dynamic switching between predefined products and custom product entries. 
+ * It includes fields for product name, symbol, price, and a file upload feature for attaching relevant documents.
  * 
- * This module represents the `DefineProductForm` page, which provides a user interface for declaring a new product type. 
- * It allows users to select from predefined product categories or add a custom product with its name, symbol, and price. 
- * Additionally, it includes a file upload feature for attaching relevant product documents.
+ * The form handles state management for both predefined and custom product types, providing feedback on successful or failed submissions, 
+ * with a progress bar for visual indication of the submission process.
  * 
- * The form dynamically toggles between selecting predefined products and adding new products. It also displays feedback 
- * on successful or failed form submissions, with a progress bar indicating the status of form reset.
+ * @see declareProductAction - Function to handle form submission to the server.
+ * @see FileUpload2 - Component for file upload functionality.
  * 
  * @module
- * @category Product Management
- * @see declareProductAction - Function handling the submission of the form data.
- * @see FileUpload2 - Component for file upload functionality used in this form.
  */
 
 'use client';
@@ -19,11 +18,6 @@ import { useState } from 'react';
 import FileUpload2 from '@/app/components/FileUpload2';
 import { declareProductAction } from './declareAction';
 
-/**
- * The `DefineProductForm` component is responsible for rendering a form that allows users to declare a new product type 
- * or select a predefined product from categorized options.
- * @public
- */
 export default function DefineProductForm() {
     // List of product categories and their respective products
     const productCategories = {

@@ -1,3 +1,10 @@
+/** 
+ * This page component displays blockchain transactions with sorting and filtering capabilities.
+ * Users can filter transactions by search terms (address, product, etc.) and price range, and sort by various fields such as address, quantity, price, and CO2 emissions.
+ * The component manages the state of transactions, filtering, sorting, and error handling.
+ * @module
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';

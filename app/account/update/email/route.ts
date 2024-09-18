@@ -1,16 +1,10 @@
-/**
- * @category API Routes
- * 
+/** 
  * This API route handles PATCH requests to update a user's email address using FusionAuth for JWT validation.
  * @module
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
-/**
- * @category API Routes
- */
 
 /**
  * Schema to validate user inputs, specifically the new email.
