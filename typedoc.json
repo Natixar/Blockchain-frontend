@@ -7,14 +7,9 @@
     "out": "docs",
     "exclude": [
         "**/*.test.ts",
-        "**/*.spec.ts"
+        "**/*.spec.ts",
+        "node_modules",
+        "public/sw.js"
     ],
     "excludeExternals": true,
-    "excludePrivate": false,
-    "includeVersion": true,
-    "visibilityFilters": {
-        "protected": true,
-        "private": true,
-        "inherited": true
-    }
 }
