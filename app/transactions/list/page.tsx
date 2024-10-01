@@ -1,6 +1,7 @@
 /** 
  * This page component displays blockchain transactions with sorting and filtering capabilities.
- * Users can filter transactions by search terms (address, product, etc.) and price range, and sort by various fields such as address, quantity, price, and CO2 emissions.
+ * Users can filter transactions by search terms (address, product, etc.), price range, quantity, and CO2 emissions.
+ * Users can also sort by various fields such as address, quantity, price, and CO2 emissions.
  * The component manages the state of transactions, filtering, sorting, and error handling.
  * @module
  */
@@ -30,7 +31,9 @@ type SortField = keyof Transaction | 'quantity' | 'price' | 'co2' | 'name';
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [searchFilter, setSearchFilter] = useState('');
-  const [amountRange, setAmountRange] = useState<[number, number]>([0, 100000]);
+  const [amountRange, setAmountRange] = useState<[number, number]>([0, 100000]); // Price range
+  const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 1000]); // Quantity range in tons
+  const [co2Range, setCo2Range] = useState<[number, number]>([0, 1000]); // CO2 range in tons
   const [showArchived, setShowArchived] = useState(false);
   const [sortField, setSortField] = useState<SortField>('address');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -45,8 +48,8 @@ export default function TransactionsPage() {
           product: {
             ...transaction.product,
             price: Math.round(transaction.product.price),
-            quantity: Math.round(transaction.product.quantity),
-            co2: Math.round(transaction.product.co2!),
+            quantity: parseFloat((transaction.product.quantity / 1000).toFixed(2)), // Convert kg to tons
+            co2: parseFloat((transaction.product.co2 / 1000).toFixed(2)), // Convert kg to tons
           },
         }));
         setTransactions(roundedData);
@@ -78,7 +81,7 @@ export default function TransactionsPage() {
     }
   };
 
-  // Apply search filter and amount range filter
+  // Apply search filter, quantity range, CO2 range, and amount range filter
   const filteredTransactions = transactions.filter((transaction) => {
     const searchFilterLowerCase = searchFilter.toLowerCase(); // Case-insensitive filter
 
@@ -93,7 +96,13 @@ export default function TransactionsPage() {
     const amountMatch =
       transaction.product.price >= amountRange[0] && transaction.product.price <= amountRange[1];
 
-    return searchMatch && amountMatch;
+    const quantityMatch =
+      transaction.product.quantity >= quantityRange[0] && transaction.product.quantity <= quantityRange[1];
+
+    const co2Match =
+      transaction.product.co2 >= co2Range[0] && transaction.product.co2 <= co2Range[1];
+
+    return searchMatch && amountMatch && quantityMatch && co2Match;
   });
 
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
@@ -134,7 +143,7 @@ export default function TransactionsPage() {
           <div className="flex flex-col md:flex-row md:space-x-4 md:order-2 space-y-2 md:space-y-0 w-full">
             <input
               type="text"
-              placeholder="Search by Address, Product, Symbol, From, To..."
+              placeholder="Search by ID, Commodity, Symbol, From, To..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="border p-1 text-sm rounded h-10 w-full md:w-96"
@@ -144,16 +153,16 @@ export default function TransactionsPage() {
           </div>
 
           <fieldset className="flex flex-col md:flex-row items-center border rounded px-2 pb-1 md:order-3 w-full md:w-auto">
-            <legend className="text-gray-700 text-sm">Amount</legend>
+            <legend className="text-gray-700 text-sm">Quantity (tons)</legend>
             <div className="flex space-x-2 items-center mt-2 md:mt-0">
               <input
                 id="minQuantity"
                 type="number"
                 placeholder="Min"
-                value={amountRange[0]}
-                onChange={(e) => setAmountRange([Number(e.target.value), amountRange[1]])}
+                value={quantityRange[0]}
+                onChange={(e) => setQuantityRange([Number(e.target.value), quantityRange[1]])}
                 className="px-2 py-1 border rounded w-1/2 text-sm bg-white text-gray-900"
-                max={amountRange[1]}
+                max={quantityRange[1]}
                 aria-label="Min quantity"
                 data-testid="min-quantity-input"
               />
@@ -161,12 +170,40 @@ export default function TransactionsPage() {
                 id="maxQuantity"
                 type="number"
                 placeholder="Max"
-                value={amountRange[1]}
-                onChange={(e) => setAmountRange([amountRange[0], Number(e.target.value)])}
+                value={quantityRange[1]}
+                onChange={(e) => setQuantityRange([quantityRange[0], Number(e.target.value)])}
                 className="px-2 py-1 border rounded w-1/2 text-sm bg-white text-gray-900"
-                min={amountRange[0]}
+                min={quantityRange[0]}
                 aria-label="Max quantity"
                 data-testid="max-quantity-input"
+              />
+            </div>
+          </fieldset>
+
+          <fieldset className="flex flex-col md:flex-row items-center border rounded px-2 pb-1 md:order-4 w-full md:w-auto">
+            <legend className="text-gray-700 text-sm">CO2eq (tons)</legend>
+            <div className="flex space-x-2 items-center mt-2 md:mt-0">
+              <input
+                id="minCO2"
+                type="number"
+                placeholder="Min"
+                value={co2Range[0]}
+                onChange={(e) => setCo2Range([Number(e.target.value), co2Range[1]])}
+                className="px-2 py-1 border rounded w-1/2 text-sm bg-white text-gray-900"
+                max={co2Range[1]}
+                aria-label="Min CO2"
+                data-testid="min-co2-input"
+              />
+              <input
+                id="maxCO2"
+                type="number"
+                placeholder="Max"
+                value={co2Range[1]}
+                onChange={(e) => setCo2Range([co2Range[0], Number(e.target.value)])}
+                className="px-2 py-1 border rounded w-1/2 text-sm bg-white text-gray-900"
+                min={co2Range[0]}
+                aria-label="Max CO2"
+                data-testid="max-co2-input"
               />
             </div>
           </fieldset>
@@ -184,7 +221,7 @@ export default function TransactionsPage() {
                 ID {sortField === 'address' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort('name')}>
-                Product {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Commodity {sortField === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort('from')}>
                 From {sortField === 'from' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -193,13 +230,13 @@ export default function TransactionsPage() {
                 To {sortField === 'to' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort('quantity')}>
-                Quantity (Kg) {sortField === 'quantity' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Quantity (Tons) {sortField === 'quantity' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort('price')}>
                 Price ($) {sortField === 'price' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort('co2')}>
-                CO2 (Kg) {sortField === 'co2' && (sortOrder === 'asc' ? '↑' : '↓')}
+                CO2eq (Tons) {sortField === 'co2' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
             </tr>
           </thead>
@@ -207,14 +244,10 @@ export default function TransactionsPage() {
             {sortedTransactions.map((transaction) => (
               <tr key={transaction.address}>
                 <td className="py-2 px-4 border-b">
-                  {/* <Link href={`/transactions/${transaction.address}`}> */}
-                    {transaction.address}
-                  {/* </Link> */}
+                  {transaction.address}
                 </td>
                 <td className="py-2 px-4 border-b">
-                  {/* <Link href={`/transactions/${transaction.address}`}> */}
-                    {transaction.product.name} ({transaction.product.symbol})
-                  {/* </Link> */}
+                  {transaction.product.name} ({transaction.product.symbol})
                 </td>
                 <td className="py-2 px-4 border-b">{transaction.from}</td>
                 <td className="py-2 px-4 border-b">{transaction.to}</td>
@@ -231,16 +264,14 @@ export default function TransactionsPage() {
       <div className="lg:hidden grid grid-cols-1 gap-4">
         {sortedTransactions.map((transaction) => (
           <div key={transaction.address} className="border rounded-md p-4 shadow-sm bg-white hover:shadow-md">
-            {/* <Link href={`/transactions/${transaction.address}`} className="block"> */}
               <div className="text-lg font-semibold">{transaction.product.name} ({transaction.product.symbol})</div>
               <div className="text-sm text-gray-600">Address: {transaction.address}</div>
               <div className="text-sm text-gray-600">From: {transaction.from}</div>
               <div className="text-sm text-gray-600">To: {transaction.to}</div>
-              <div className="text-sm text-gray-600">Quantity: {transaction.product.quantity} Kg</div>
+              <div className="text-sm text-gray-600">Quantity: {transaction.product.quantity} Tons</div>
               <div className="text-sm text-gray-600">Price: {transaction.product.price} $</div>
-              <div className="text-sm text-gray-600">CO2: {transaction.product.co2} Kg</div>
+              <div className="text-sm text-gray-600">CO2eq: {transaction.product.co2} Tons</div>
               <div className="mt-2 text-blue-600 text-sm">View Details</div>
-            {/* </Link> */}
           </div>
         ))}
       </div>

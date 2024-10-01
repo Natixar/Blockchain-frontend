@@ -49,8 +49,8 @@ async function fetchEmailByBlockchainAddress(blockchainAddress: string): Promise
  */
 async function sendEmail(to: string, subject: string, text: string) {
   const transporter = nodemailer.createTransport({
-    host: 'localhost',
-    port: 2525,
+    host: process.env.NODEMAILER_DOMAIN,
+    port: Number(process.env.NODEMAILER_PORT),
     secure: false,
     tls: {
       rejectUnauthorized: false, // If you have a self-signed certificate
@@ -109,7 +109,6 @@ const userInputsSchema = z.object({
  *     transporterEmail: 'transporter@example.com',
  *     product: 'Mineral',
  *     quantity: 100,
- *     account: { keyId: '1', address: '0xAccountAddress' }
  *   })
  * });
  */

@@ -11,22 +11,23 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * GET handler for retrieving a specific product's information from the blockchain.
  * 
- * @param {NextRequest} request - The incoming request object, which contains the `accountAddress` as a query parameter.
- * @param {{ params: { productAddress: string } }} params - The route parameters containing the product address.
+ * @param {object} context - The context object containing route parameters.
+ * @param {object} context.params - The parameters extracted from the route.
+ * @param {string} context.params.productAddress - The product's blockchain address from the route.
+ * 
  * @returns {Promise<NextResponse>} A JSON response with the rounded product data, including price, quantity, and CO2 emissions, or an error message.
  * 
- * @throws {Error} Will throw if the `accountAddress` or `productAddress` is missing, if the product is not found, or if the blockchain request fails.
+ * @throws {Error} Will throw if the `productAddress` is missing, if the product is not found, or if the blockchain request fails.
  * 
  * @remarks
  * This function:
- * 1. Retrieves the `accountAddress` from the query parameters and `productAddress` from the URL parameters.
- * 2. Fetches all products associated with the `accountAddress` from the blockchain.
+ * 2. Fetches all products associated an account from the blockchain.
  * 3. Finds the specific product by `productAddress` and rounds its numerical data (price, quantity, CO2).
  * 4. Returns the rounded product data or an appropriate error message.
  * 
  * @example
  * // Example of an API request to this route:
- * fetch('/api/get-product?accountAddress=0xAccountAddress123', {
+ * fetch('/api/getProducts', {
  *   method: 'GET'
  * });
  * 

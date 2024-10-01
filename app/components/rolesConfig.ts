@@ -7,29 +7,29 @@ export interface Link {
 
 const rolesConfig: Record<Role, Link[]> = {
   mine: [
-    { label: 'Products list', path: '/product/list' },
-    { label: 'Mint product', path: '/mine/minting' },
-    { label: 'Declare Product', path: '/product/declare' },
-    { label: 'Transactions list', path: '/transactions/list' },
+    { label: 'Mint commodity', path: '/mine/minting' },
+    { label: 'Commodities stock', path: '/product/list' },
     { label: 'Create transaction', path: '/transactions/create' },
+    { label: 'Transactions list', path: '/transactions/list' },
+    { label: 'Define commodity', path: '/product/declare' },
     { label: 'Load package', path: '/product/load' },
   ],
   smeltery: [
-    { label: 'Products list', path: '/product/list' },
+    { label: 'Commodities stock', path: '/product/list' },
     { label: 'Load package', path: '/product/load' },
     { label: 'Unload package', path: '/product/unload' },
-    { label: 'Smelter product', path: '/smeltery/smelter' },
-    { label: 'Declare product', path: '/product/declare' },
-    { label: 'Transactions list', path: '/transactions/list' },
+    { label: 'Smelt commodities', path: '/smeltery/smelter' },
+    { label: 'Define commodity', path: '/product/declare' },
     { label: 'Create transaction', path: '/transactions/create' },
+    { label: 'Transactions list', path: '/transactions/list' },
   ],
   manufacturer: [
     { label: 'Scan new product', path: '/product/unload' },
     { label: 'Products list', path: '/manufacturer' },
   ],
   trader: [
-    { label: 'Transactions list', path: '/transactions/list' },
     { label: 'Create transaction', path: '/transactions/create' },
+    { label: 'Transactions list', path: '/transactions/list' },
   ],
   // transport: [
   //   { label: 'Transport list', path: '/transport/list' },

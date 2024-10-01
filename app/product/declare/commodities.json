@@ -1,0 +1,58 @@
+{
+    "Iron and Ferro-Alloy Metals": [
+        {
+            "name": "Iron",
+            "symbol": "Fe",
+            "price": 120
+        },
+        {
+            "name": "Chromium",
+            "symbol": "Cr2O3",
+            "price": 150
+        },
+        {
+            "name": "Cobalt",
+            "symbol": "Co",
+            "price": 320
+        },
+        {
+            "name": "Manganese",
+            "symbol": "Mn",
+            "price": 85
+        }
+    ],
+    "Non-Ferrous Metals": [
+        {
+            "name": "Aluminium",
+            "symbol": "Al",
+            "price": 190
+        },
+        {
+            "name": "Copper",
+            "symbol": "Cu",
+            "price": 220
+        },
+        {
+            "name": "Zinc",
+            "symbol": "Zn",
+            "price": 145
+        }
+    ],
+    "Precious Metals": [
+        {
+            "name": "Gold",
+            "symbol": "Au",
+            "price": 1800
+        },
+        {
+            "name": "Silver",
+            "symbol": "Ag",
+            "price": 25
+        },
+        {
+            "name": "Platinum",
+            "symbol": "Pt",
+            "price": 950
+        }
+    ]
+}

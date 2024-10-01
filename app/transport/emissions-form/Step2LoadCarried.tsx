@@ -16,7 +16,7 @@ const unitConversionToKg = {
 };
 
 export default function Step2LoadCarried({ loadCarried, setLoadCarried }: Step2LoadCarriedProps) {
-  const [unit, setUnit] = useState<UnitType>('kg'); // Restrict unit to the keys of unitConversionToKg
+  const [unit, setUnit] = useState<UnitType>('t'); // Restrict unit to the keys of unitConversionToKg
   const [displayedQuantity, setDisplayedQuantity] = useState(loadCarried);
 
   const handleUnitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -64,9 +64,9 @@ export default function Step2LoadCarried({ loadCarried, setLoadCarried }: Step2L
           aria-label="Unit"
         >
           <option value="kg">kg</option>
-          <option value="t">Metric Ton (t)</option>
-          <option value="short t">Short Ton (short t)</option>
-          <option value="long t">Long Ton (long t)</option>
+          <option value="t">Metric ton</option>
+          <option value="short t">Short ton</option>
+          <option value="long t">Long ton</option>
         </select>
         <label
           htmlFor="unit"

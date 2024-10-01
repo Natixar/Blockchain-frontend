@@ -28,6 +28,7 @@ export default function SmelteringForm() {
   const [usedProducts, setUsedProducts] = useState<Product[]>([]);
   const [resultingProducts, setResultingProducts] = useState<Product[]>([]);
   const [co2Emission, setCo2Emission] = useState('');
+  const [co2Unit, setCo2Unit] = useState('t'); // Default unit for CO2 is metric ton
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -95,10 +96,13 @@ export default function SmelteringForm() {
       amount: prod.unit === 't' ? prod.quantity * 1000 : prod.quantity, // Convert to kg if in tons
     }));
   
+    // Convert CO2 to kg if the unit is metric ton
+    const co2EmissionInKg = co2Unit === 't' ? parseFloat(co2Emission) * 1000 : parseFloat(co2Emission);
+  
     const requestData = {
       input,
       output,
-      footprint: parseInt(co2Emission),
+      footprint: co2EmissionInKg,
       account: Smelter_1,
     };
   
@@ -124,12 +128,12 @@ export default function SmelteringForm() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-light text-center mb-8 underline decoration-green-500">
-        Smeltering Form
+      <h1 className="text-3xl font-light text-center text-blue-950 mb-8 underline decoration-green-500">
+        Smelt commodities
       </h1>
       <form onSubmit={handleSubmit} ref={formRef} className="space-y-4 max-w-lg mx-auto">
         <div>
-          <h3 className="font-semibold">Used Products</h3>
+          <h3 className="font-medium">Process inputs</h3>
           {usedProducts.map((product, index) => (
             <div key={index} className="flex space-x-2 items-center mt-2">
               <div className="flex-1">
@@ -139,7 +143,7 @@ export default function SmelteringForm() {
                   setSelectedProduct={(selectedProduct) =>
                     handleProductChange(usedProducts, setUsedProducts, index, 'address', selectedProduct?.address || null)
                   }
-                  placeholder="Select a product"
+                  placeholder="Select commodity"
                 />
               </div>
               <input
@@ -173,15 +177,15 @@ export default function SmelteringForm() {
           ))}
           <button
             type="button"
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
             onClick={handleAddUsedProduct}
           >
-            Add Used Product
+            Add
           </button>
         </div>
 
         <div>
-          <h3 className="font-semibold">Resulting Products</h3>
+          <h3 className="font-medium">Process outputs</h3>
           {resultingProducts.map((product, index) => (
             <div key={index} className="flex space-x-2 items-center mt-2">
               <div className="flex-1">
@@ -191,7 +195,7 @@ export default function SmelteringForm() {
                   setSelectedProduct={(selectedProduct) =>
                     handleProductChange(resultingProducts, setResultingProducts, index, 'address', selectedProduct?.address || null)
                   }
-                  placeholder="Select a resulting product"
+                  placeholder="Select commodity"
                 />
               </div>
               <input
@@ -225,32 +229,36 @@ export default function SmelteringForm() {
           ))}
           <button
             type="button"
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+            className="mt-2 px-4 py-2 bg-green-500 text-white rounded"
             onClick={handleAddResultingProduct}
           >
-            Add Resulting Product
+            Add
           </button>
         </div>
 
         <div>
-          <h3 className="font-semibold">Total CO2 Emissions (kg)</h3>
-          <div className="relative mt-2">
+          <h3 className="font-medium">Total CO2eq</h3>
+          <div className="flex space-x-2 items-center mt-2">
             <input
-              type="text"
+              type="number"
               name="co2Emission"
               id="co2Emission"
               value={co2Emission}
               onChange={(e) => setCo2Emission(e.target.value)}
-              className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
-              placeholder="CO2 Emissions"
-              aria-label="CO2 Emissions"
+              className="border p-2 w-full focus:ring-blue-500"
+              placeholder="Enter CO2eq"
             />
-            <label
-              htmlFor="co2Emission"
-              className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
+            <select
+              value={co2Unit}
+              onChange={(e) => setCo2Unit(e.target.value)}
+              className="border p-2 bg-white h-full"
             >
-              CO2 Emissions
-            </label>
+              {units.map((unit) => (
+                <option key={unit} value={unit}>
+                  {unit}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

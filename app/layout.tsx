@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Questrial } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const questrial = Questrial({weight: '400', subsets: ['latin']});
 
 const APP_NAME = "Natixar";
 const APP_DEFAULT_TITLE = "Natixar CO2 Tracking";
@@ -56,7 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <head />
-      <body className={inter.className}>{children}</body>
+      <body className={questrial.className}>{children}</body>
     </html>
   );
 }

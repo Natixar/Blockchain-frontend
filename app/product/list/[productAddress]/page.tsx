@@ -117,38 +117,34 @@ export default function ProductDetailPage({ params }: { params: { productAddress
     }
   };
 
-  if (isLoading) return <p className="text-gray-500 text-center">Loading product details...</p>;
+  if (isLoading) return <p className="text-gray-500 text-center">Loading commodity details...</p>;
 
   if (error) return <p className="text-red-500 text-center">{error}</p>;
 
   return (
-    <div className="container mx-auto max-w-3xl">
-      <h1 className="text-3xl font-light text-center mb-8 underline decoration-green-500">Product Details</h1>
+    <div className="container mx-auto max-w-4xl p-6">
+      <h1 className="text-3xl font-light text-center mb-8 text-blue-950 underline decoration-green-500">Commodity details</h1>
+      
       {product && (
         <>
-          <section className="mb-8">
-            <p className="mt-2 text-lg">
-              <span className="font-bold">Name:</span> {product.name} ({product.symbol})
-            </p>
-            <p className="text-lg">
-              <span className="font-bold">Quantity:</span> {product.quantity} Kg
-            </p>
-            <p className="text-lg">
-              <span className="font-bold">CO2 Emission:</span> {product.co2} Kg
-            </p>
-            <p className="text-lg">
-              <span className="font-bold">Average Price:</span> {product.price} $
-            </p>
+          {/* Product Characteristics Section */}
+          <section className="mb-8 p-6 bg-white border border-gray-200 shadow-md rounded-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-blue-900">Commodity characteristics</h2>
+            <div className="text-lg">
+              <p className="mb-2"><span className="font-bold">Commodity:</span> {product.name} ({product.symbol})</p>
+              <p className="mb-2"><span className="font-bold">Quantity:</span> {product.quantity} tons</p>
+              <p className="mb-2"><span className="font-bold">CO2eq:</span> {product.co2} tons</p>
+              <p className="mb-2"><span className="font-bold">Average price:</span> {product.price} $</p>
+            </div>
           </section>
 
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold">Attached Documents</h2>
-            <ul className="mt-4 space-y-3">
+          {/* Attached Documents Section */}
+          <section className="mb-8 p-6 bg-white border border-gray-200 shadow-md rounded-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-blue-900">Attached documents</h2>
+            <ul className="space-y-3">
               {product.files?.map(hash => (
-                <li key={hash} className="flex items-center justify-between">
-                  {/* <Link href={`/path/to/download/${hash}`} className="text-blue-600 hover:underline break-all">
-                    {hash}
-                  </Link> */}
+                <li key={hash} className="flex items-center justify-between border-b pb-2">
+                  <span className="text-gray-800 break-all">{hash}</span>
                   <button
                     onClick={() => handleDocumentDelete(hash)}
                     className="text-red-600 hover:text-red-800 transition-colors"
@@ -158,11 +154,13 @@ export default function ProductDetailPage({ params }: { params: { productAddress
                   </button>
                 </li>
               ))}
+              {!product.files?.length && <p className="text-gray-500">No documents attached.</p>}
             </ul>
           </section>
 
-          <section className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">Add New Documents</h2>
+          {/* Upload New Documents Section */}
+          <section className="mb-8 p-6 bg-white border border-gray-200 shadow-md rounded-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-blue-900">Add new documents</h2>
             <FileUpload onFileUpload={handleDocumentUpload} />
             {isUploading && <p className="text-gray-500 mt-2">Uploading documents...</p>}
           </section>

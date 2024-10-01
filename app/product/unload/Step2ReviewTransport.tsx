@@ -63,13 +63,13 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
           </h2>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product Name</span>
+              <span className="text-gray-500">Commodity</span>
               <span className="text-gray-900 font-medium">
                 {transactionInfo.product?.name || 'N/A'}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product Symbol</span>
+              <span className="text-gray-500">Symbol</span>
               <span className="text-gray-900 font-medium">
                 {transactionInfo.product?.symbol || 'N/A'}
               </span>
@@ -77,7 +77,7 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
             <div className="flex justify-between items-center">
               <span className="text-gray-500">Quantity</span>
               <span className="text-gray-900 font-medium">
-                {transactionInfo.product?.quantity || 0} Kg
+                {transactionInfo.product?.quantity || 0} Tons
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -87,9 +87,9 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product CO2</span>
+              <span className="text-gray-500">Commodity CO2eq</span>
               <span className="text-gray-900 font-medium">
-                {transactionInfo.product?.co2 || 0} Kg
+                {transactionInfo.product?.co2 || 0} Tons
               </span>
             </div>
           </div>

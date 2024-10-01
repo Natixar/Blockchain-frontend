@@ -16,7 +16,7 @@ import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 interface Product {
   name: string;
   address: string;
-  quantity: number; // quantity available in kg
+  quantity: number;
 }
 
 interface Group {
@@ -30,7 +30,7 @@ interface Transaction {
   to: string;
   transporter: string;
   product: string;
-  quantity: number; // quantity in kg
+  quantity: number;
 }
 
 export default function CreateTransaction() {
@@ -44,7 +44,7 @@ export default function CreateTransaction() {
   });
   const [products, setProducts] = useState<Product[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [unit, setUnit] = useState('kg'); // Track the selected unit
+  const [unit, setUnit] = useState('t');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isTransactionSuccessful, setIsTransactionSuccessful] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,7 +92,7 @@ export default function CreateTransaction() {
       transaction.product !== '' &&
       transaction.quantity > 0 &&
       selectedProduct !== null &&
-      transaction.quantity <= selectedProduct.quantity // Ensure quantity is valid
+      transaction.quantity <= selectedProduct.quantity
     );
   };
 
@@ -192,8 +192,8 @@ export default function CreateTransaction() {
 
   return (
     <section className="max-w-lg mx-auto">
-      <h1 className="text-3xl font-light text-center mb-8 underline decoration-green-500">
-        Create New Transaction
+      <h1 className="text-3xl font-light text-center text-blue-950 mb-8 underline decoration-green-500">
+        Create new transaction
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <fieldset aria-label="Transaction Details">
@@ -203,20 +203,17 @@ export default function CreateTransaction() {
               name="from"
               value={transaction.from}
               onChange={handleChange}
-              className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="block w-full px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               aria-label="From"
               required
             >
-              <option value="">Select From Address</option>
+              <option value="">From company</option>
               {groups.map((entity) => (
                 <option key={entity.blockchainAddress} value={entity.blockchainAddress}>
                   {entity.name}
                 </option>
               ))}
             </select>
-            <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500">
-              From
-            </label>
           </div>
 
           <div className="relative">
@@ -224,21 +221,17 @@ export default function CreateTransaction() {
               name="to"
               value={transaction.to}
               onChange={handleChange}
-              className="block w-full mt-6 px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="block w-full mt-6 px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               aria-label="To"
               required
-              style={{ paddingRight: '3rem' }} // Extra padding on the right for arrow
             >
-              <option value="">Select To Address</option>
+              <option value="">To company</option>
               {groups.map((entity) => (
                 <option key={entity.blockchainAddress} value={entity.blockchainAddress}>
                   {entity.name}
                 </option>
               ))}
             </select>
-            <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500">
-              To
-            </label>
           </div>
 
           <div className="relative">
@@ -247,16 +240,16 @@ export default function CreateTransaction() {
               name="transporter"
               value={transaction.transporter}
               onChange={handleChange}
-              className="block w-full mt-6 px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+              className="block w-full mt-6 px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
               placeholder="Transporter Email"
               aria-label="Transporter Email"
               required
             />
             <label
               htmlFor="transporter"
-              className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
+              className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500 pointer-events-none"
             >
-              Transporter Email
+              Transporter&apos;s email
             </label>
           </div>
 
@@ -265,21 +258,17 @@ export default function CreateTransaction() {
               name="product"
               value={transaction.product}
               onChange={handleChange}
-              className="block w-full mt-6 px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="block w-full mt-6 px-4 py-5 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               aria-label="Product Name"
               required
-              style={{ paddingRight: '3rem' }} // Extra padding on the right for arrow
             >
-              <option value="">Select Product</option>
+              <option value="">Select commodity</option>
               {products.map((product) => (
                 <option key={product.address} value={product.address}>
                   {product.name}
                 </option>
               ))}
             </select>
-            <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500">
-              Product Name
-            </label>
           </div>
 
           {/* Quantity and Unit Selection */}
@@ -290,14 +279,14 @@ export default function CreateTransaction() {
                 name="quantity"
                 value={transaction.quantity === 0 ? '' : transaction.quantity}
                 onChange={handleChange}
-                className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+                className="block w-full px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
                 placeholder="Quantity"
                 aria-label="Quantity"
                 required
                 min={1}
                 max={selectedProduct ? selectedProduct.quantity : undefined}
               />
-              <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500">
+              <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500 pointer-events-none">
                 Quantity
               </label>
             </div>
@@ -306,18 +295,14 @@ export default function CreateTransaction() {
                 name="unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="block w-full px-4 py-5 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 aria-label="Unit"
-                style={{ paddingRight: '2rem' }} // Extra padding for the arrow
               >
                 <option value="kg">kg</option>
-                <option value="t">Metric Ton (t)</option>
-                <option value="short t">Short Ton (short t)</option>
-                <option value="long t">Long Ton (long t)</option>
+                <option value="t">Metric ton</option>
+                <option value="short t">Short ton</option>
+                <option value="long t">Long ton</option>
               </select>
-              <label className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500">
-                Unit
-              </label>
             </div>
           </div>
 
@@ -357,7 +342,7 @@ export default function CreateTransaction() {
                   Processing...
                 </span>
               ) : (
-                'Create Transaction'
+                'Create transaction'
               )}
             </button>
           </div>

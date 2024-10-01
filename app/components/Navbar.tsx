@@ -23,14 +23,14 @@ interface NavbarProps {
 }
 
 const icons = {
-  'products list': productsSVG,
-  'mint product': mintSVG,
-  'declare product': defineSVG,
+  'commodities stock': productsSVG,
+  'mint commodity': mintSVG,
+  'define commodity': defineSVG,
   'transactions list': transactionsSVG,
   'create transaction': transactionSVG,
   'load package': loadSVG,
   'unload package': unloadSVG,
-  'smelter product': smeltSVG,
+  'smelt commodities': smeltSVG,
   'scan new product': (
     <svg viewBox="64 64 896 896" focusable="false" width="24" height="24" fill="currentColor" aria-hidden="true">
       <path d="M184 336h656v528H184V336zm0-96v-56c0-4.4-3.6-8-8-8H96c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h80c4.4 0 8-3.6 8-8zm576-56v56c0 4.4 3.6 8 8 8h80c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8h-80c-4.4 0-8 3.6-8 8zm0 752v56c0 4.4 3.6 8 8 8h80c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8h-80c-4.4 0-8 3.6-8 8zm-576 0v56c0 4.4 3.6 8 8 8h80c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H184c-4.4 0-8 3.6-8 8z"></path>

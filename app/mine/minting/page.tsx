@@ -3,7 +3,7 @@
  * Users can select a mineral, specify the quantity, choose a unit (kg, metric ton, etc.), and input CO2 emissions for the minting process. 
  * The form includes validation for the input fields and sends a request to the backend API to mint the selected mineral.
  * 
- * The component manages state for the minerals, selected product, quantity, unit, CO2 emissions, and form submission status. 
+ * The component manages state for the minerals, selected commodity, quantity, unit, CO2 emissions, and form submission status. 
  * It also handles form validation, loading indicators, and displays feedback messages for success or failure.
  * 
  * @module
@@ -19,8 +19,9 @@ export default function MintingForm() {
   const [minerals, setMinerals] = useState<Product[]>([]);
   const [selectedMineralAddress, setSelectedMineralAddress] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('');
-  const [unit, setUnit] = useState('kg');
+  const [quantityUnit, setQuantityUnit] = useState('t'); // Separate unit for quantity
   const [co2, setCo2] = useState<string>('');
+  const [co2Unit, setCo2Unit] = useState('t'); // Separate unit for CO2
   const [formState, setFormState] = useState<{ success: boolean | null; message: string }>({
     success: null,
     message: '',
@@ -67,23 +68,32 @@ export default function MintingForm() {
       return;
     }
 
-    if (parseInt(quantity) <= 0 || parseInt(co2) < 0) {
+    if (parseFloat(quantity) <= 0 || parseFloat(co2) < 0) {
       setFormState({ success: false, message: 'Quantity must be greater than 0 and CO2 must be non-negative.' });
       return;
     }
 
     setIsLoading(true); // Start loading
-    
+
+    // Convert quantity to kg based on unit
     let quantityInKg = parseFloat(quantity || '0');
-    if (unit === 't') {
+    if (quantityUnit === 't') {
       quantityInKg *= 1000;
-    } else if (unit === 'short t') {
+    } else if (quantityUnit === 'short t') {
       quantityInKg *= 907.2;
-    } else if (unit === 'long t') {
+    } else if (quantityUnit === 'long t') {
       quantityInKg *= 1016.047;
     }
 
-    const co2Value = parseFloat(co2 || '0');
+    // Convert CO2 emissions to kg based on unit
+    let co2InKg = parseFloat(co2 || '0');
+    if (co2Unit === 't') {
+      co2InKg *= 1000;
+    } else if (co2Unit === 'short t') {
+      co2InKg *= 907.2;
+    } else if (co2Unit === 'long t') {
+      co2InKg *= 1016.047;
+    }
 
     try {
       const selectedMineral = minerals.find((mineral) => mineral.address === selectedMineralAddress);
@@ -92,10 +102,9 @@ export default function MintingForm() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productAddress: selectedMineral.address,
-            quantity: quantityInKg,
-            footprint: co2Value,
-            account: Mine_1,
+            commodityAddress: selectedMineral.address,
+            quantity: quantityInKg, // Quantity in kg for API
+            footprint: co2InKg, // CO2 emissions in kg for API
           }),
         });
 
@@ -130,40 +139,30 @@ export default function MintingForm() {
 
   return (
     <section className="max-w-lg mx-auto">
-      <h1 className="text-3xl font-light text-center mb-8 underline decoration-green-500">Minting Form</h1>
+      <h1 className="text-3xl font-light text-center text-blue-950 mb-8 underline decoration-green-500">Minting commodity</h1>
 
       <form onSubmit={handleSubmit} onInput={handleUserInput} className="space-y-4" noValidate>
         <fieldset aria-label="Minting Form">
-          <div className="relative">
-            {minerals.length === 1 ? (
-              <h2 className="text-2xl font-light text-center">{minerals[0].name}</h2>
-            ) : (
-              <div className="relative">
-                <select
-                  id="mineral"
-                  value={selectedMineralAddress}
-                  onChange={(e) => setSelectedMineralAddress(e.target.value)}
-                  className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent bg-white"
-                  aria-label="Select Mineral"
-                >
-                  <option value="" disabled>
-                    Select a mineral
-                  </option>
-                  {minerals.map((mineral) => (
-                    <option key={mineral.address} value={mineral.address}>
-                      {mineral.name}
-                    </option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="mineral"
-                  className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
-                >
-                  Mineral
-                </label>
-              </div>
-            )}
-          </div>
+          {minerals.length === 1 ? (
+            <h2 className="text-2xl font-light text-center">{minerals[0].name}</h2>
+          ) : (
+            <select
+              id="mineral"
+              value={selectedMineralAddress}
+              onChange={(e) => setSelectedMineralAddress(e.target.value)}
+              className="block w-full px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent bg-white"
+              aria-label="Select a commodity"
+            >
+              <option value="" disabled>
+                Select a commodity
+              </option>
+              {minerals.map((mineral) => (
+                <option key={mineral.address} value={mineral.address}>
+                  {mineral.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           <div className="flex space-x-2 items-center mt-6">
             <div className="relative flex-grow">
@@ -173,7 +172,7 @@ export default function MintingForm() {
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 onBlur={(e) => setQuantity(e.target.value || '')}
-                className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+                className="block w-full px-4 pt-4 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
                 placeholder="Quantity"
                 aria-label="Quantity"
                 aria-invalid={!isFormValid}
@@ -185,46 +184,56 @@ export default function MintingForm() {
                 Quantity
               </label>
             </div>
-            <div className="relative w-1/4">
+            <div className="w-1/4">
               <select
-                id="unit"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                className="block w-full px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent bg-white"
+                id="quantity-unit"
+                value={quantityUnit} // Separate unit for quantity
+                onChange={(e) => setQuantityUnit(e.target.value)}
+                className="block w-full px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent bg-white"
                 aria-label="Unit"
               >
                 <option value="kg">kg</option>
-                <option value="t">Metric Ton (t)</option>
-                <option value="short t">Short Ton (short t)</option>
-                <option value="long t">Long Ton (long t)</option>
+                <option value="t">Metric Ton</option>
+                <option value="short t">Short Ton</option>
+                <option value="long t">Long Ton</option>
               </select>
-              <label
-                htmlFor="unit"
-                className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
-              >
-                Unit
-              </label>
             </div>
           </div>
 
-          <div className="relative flex-grow">
-            <input
-              type="number"
-              id="co2"
-              value={co2}
-              onChange={(e) => setCo2(e.target.value)}
-              onBlur={(e) => setCo2(e.target.value || '')}
-              className="block w-full mt-6 px-4 pt-6 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
-              placeholder="Total CO2 Emissions"
-              aria-label="Total CO2 Emissions"
-              aria-invalid={!isFormValid}
-            />
-            <label
-              htmlFor="co2"
-              className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
-            >
-              Total CO2 Emissions (kg)
-            </label>
+          <div className="flex space-x-2 items-center mt-6">
+            <div className="relative flex-grow">
+              <input
+                type="number"
+                id="co2"
+                value={co2}
+                onChange={(e) => setCo2(e.target.value)}
+                onBlur={(e) => setCo2(e.target.value || '')}
+                className="block w-full px-4 pt-4 pb-2 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent"
+                placeholder="Total CO2 Emissions"
+                aria-label="Total CO2 Emissions"
+                aria-invalid={!isFormValid}
+              />
+              <label
+                htmlFor="co2"
+                className="absolute left-4 top-0.5 px-1 bg-white text-gray-600 text-base transition-all transform -translate-y-3 scale-75 origin-top-left peer-placeholder-shown:scale-100 peer-placeholder-shown:top-1/2 peer-focus:top-0.5 peer-focus:scale-75 peer-focus:text-blue-500"
+              >
+                Total CO2eq
+              </label>
+            </div>
+            <div className="w-1/4">
+              <select
+                id="co2-unit"
+                value={co2Unit} // Separate unit for CO2
+                onChange={(e) => setCo2Unit(e.target.value)}
+                className="block w-full px-4 py-4 text-lg border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 peer placeholder-transparent bg-white"
+                aria-label="Unit"
+              >
+                <option value="kg">kg</option>
+                <option value="t">Metric Ton</option>
+                <option value="short t">Short Ton</option>
+                <option value="long t">Long Ton</option>
+              </select>
+            </div>
           </div>
 
           {/* Submit button */}
@@ -264,7 +273,7 @@ export default function MintingForm() {
                   Processing...
                 </span>
               ) : (
-                'Mint Mineral'
+                'Mint commodity'
               )}
             </button>
           </div>
