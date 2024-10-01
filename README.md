@@ -100,6 +100,14 @@ npx playwright test
 
 The tests are configured to run across different browsers and devices, simulating real-world usage scenarios.
 
+## Linting
+
+Linting rules are defined in the `.eslintrc.json` file. When using [**Next.js ESLint**](https://nextjs.org/docs/app/building-your-application/configuring/eslint), the linter runs automatically during the build process. However, you can also run it manually with the following command:
+
+```bash
+npm run lint
+```
+
 ## Documentation
 
 The project documentation is generated automatically using [**Typedoc**](https://typedoc.org/guides/overview/). You can generate and view the documentation as follows:
@@ -110,3 +118,7 @@ The project documentation is generated automatically using [**Typedoc**](https:/
    ```
 
 2. The generated documentation will be available in the `docs` directory.
+
+## Misc
+
+You can manage the commodities presets list by modifying content in app/product/declare/commodities.json
