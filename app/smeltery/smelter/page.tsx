@@ -18,7 +18,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ProductSelect from './ProductSelect';
-import { Smelter_1 } from '@/app/blockchain/src/setupAccounts';
 import { Product } from '@/app/product/Tproduct';
 
 const units = ['kg', 't'];
@@ -35,7 +34,7 @@ export default function SmelteringForm() {
   useEffect(() => {
     async function fetchUserProducts() {
       try {
-        const response = await fetch(`/blockchain/api/product/list?accountAddress=${Smelter_1.address}`);
+        const response = await fetch(`/product/getProducts`);
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);
@@ -103,7 +102,6 @@ export default function SmelteringForm() {
       input,
       output,
       footprint: co2EmissionInKg,
-      account: Smelter_1,
     };
   
     try {

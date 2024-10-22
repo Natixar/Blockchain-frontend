@@ -18,7 +18,6 @@ import QRCodeScanner from '@/app/components/QRCodeScanner';
 import Step2ReviewTransport from './Step2ReviewTransport';
 import Step3DocumentUpload from './Step3DocumentUpload';
 import { Transaction } from '@/app/transactions/Ttransaction';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 
 export default function UnloadForm() {
     const router = useRouter();
@@ -36,7 +35,7 @@ export default function UnloadForm() {
     const handleNextStep1 = async (transactionAddress: string, transportEmissions: number) => {
         try {
             setError(null);
-            const response = await fetch(`/transactions/get?transactionAddress=${transactionAddress}&accountAddress=${Mine_1.address}`);
+            const response = await fetch(`/transactions/getTransactions?transactionAddress=${transactionAddress}`);
 
             if (!response.ok) {
                 throw new Error('Failed to fetch contract data');
@@ -59,18 +58,17 @@ export default function UnloadForm() {
         setIsLoading(true); // Start loading
         setError(null); // Clear previous error
         try {
-            const response = await fetch('/blockchain/api/package/load', {
+            const response = await fetch('/product/unload/unload', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     transactionAddress: transactionInfo.address,
                     transportEmissions: transactionInfo.transportEmissions,
-                    account: Mine_1, // Assuming the account is Mine_1
                 }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load package');
+                throw new Error('Failed to unload package');
             }
 
             const responseData = await response.json();
@@ -85,8 +83,8 @@ export default function UnloadForm() {
                 router.push('/product/list');
             }, 3000); // Wait for 3 seconds before redirecting
         } catch (error) {
-            setError("Failed to load package");
-            console.error("Failed to load package", error);
+            setError("Failed to unload package");
+            console.error("Failed to unload package", error);
         } finally {
             setIsLoading(false); // Stop loading
         }
@@ -181,7 +179,7 @@ export default function UnloadForm() {
                         className="mt-8 p-4 mx-auto max-w-lg text-green-700 bg-green-100 border-green-400 border rounded relative"
                         role="alert"
                     >
-                        Package loaded successfully! Redirecting...
+                        Package unloaded successfully! Redirecting...
                         <div
                             className="absolute bottom-0 left-0 h-1 bg-green-500 transition-all"
                             style={{ width: `${progress}%`, transition: 'width 3s linear' }}

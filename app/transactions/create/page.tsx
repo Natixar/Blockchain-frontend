@@ -11,7 +11,6 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 
 interface Product {
   name: string;
@@ -54,7 +53,7 @@ export default function CreateTransaction() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const response = await fetch(`/blockchain/api/product/list?accountAddress=${Mine_1.address}`);
+        const response = await fetch(`/product/getProducts`);
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
@@ -157,7 +156,6 @@ export default function CreateTransaction() {
         transporterEmail: transaction.transporter,
         product: transaction.product,
         quantity: quantityInKg, // Send quantity in kilograms to the API
-        account: Mine_1,
       };
 
       const response = await fetch('/transactions/create/createPackage', {
@@ -179,6 +177,7 @@ export default function CreateTransaction() {
       setProgress(100);
       setTimeout(() => setProgress(0), 100);
     } catch (err) {
+      console.error(err);
       setErrorMessage('Failed to create transaction');
       setIsTransactionSuccessful(false);
     } finally {

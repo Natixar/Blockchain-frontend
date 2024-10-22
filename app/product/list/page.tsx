@@ -12,13 +12,10 @@
 
 import { useEffect, useState } from 'react';
 import { Product } from '../Tproduct';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 import Link from 'next/link';
 
-async function fetchProducts(accountAddress: string): Promise<Product[]> {
-  const response = await fetch(
-    `/blockchain/api/product/list?accountAddress=${accountAddress}`
-  );
+async function fetchProducts(): Promise<Product[]> {
+  const response = await fetch(`/product/getProducts`);
   if (!response.ok) {
     throw new Error('Failed to fetch products');
   }
@@ -29,21 +26,28 @@ async function fetchProducts(accountAddress: string): Promise<Product[]> {
 export default function UnifiedProductListPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filter, setFilter] = useState('');
-  const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 100000]);
-  const [co2Range, setCO2Range] = useState<[number, number]>([0, 100000]);
-  const [maxQuantity, setMaxQuantity] = useState(10000);
-  const [maxCO2, setMaxCO2] = useState(1000);
-  const accountAddress = Mine_1.address; // Change this to dynamically fetch the account based on user role or selection
+  const [quantityRange, setQuantityRange] = useState<[number, number]>([0, 0]);
+  const [co2Range, setCO2Range] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await fetchProducts(accountAddress);
+      const products = await fetchProducts();
       setProducts(products);
-      setMaxQuantity(Math.max(...products.map((product) => product.quantity)));
-      setMaxCO2(Math.max(...products.map((product) => product.co2!)));
+
+      const quantities = products.map((product) => product.quantity);
+      const co2Values = products.map((product) => product.co2 || 0);
+
+      // Calculate min and max for quantity and CO2
+      const minQuantity = Math.min(...quantities);
+      const maxQuantity = Math.max(...quantities);
+      const minCO2 = Math.min(...co2Values);
+      const maxCO2 = Math.max(...co2Values);
+
+      setQuantityRange([minQuantity, maxQuantity]);
+      setCO2Range([minCO2, maxCO2]);
     };
     fetchData();
-  });
+  }, []);
 
   // Filtering logic
   const filteredProducts = products.filter((product) => {
@@ -85,7 +89,7 @@ export default function UnifiedProductListPage() {
               value={quantityRange[0]}
               onChange={(e) => setQuantityRange([Number(e.target.value), quantityRange[1]])}
               className="px-2 py-1 border rounded w-full text-sm bg-white text-gray-900"
-              max={maxQuantity}
+              max={quantityRange[1]}
             />
             <input
               type="number"
@@ -93,7 +97,7 @@ export default function UnifiedProductListPage() {
               value={quantityRange[1]}
               onChange={(e) => setQuantityRange([quantityRange[0], Number(e.target.value)])}
               className="px-2 py-1 border rounded w-full text-sm bg-white text-gray-900"
-              max={maxQuantity}
+              max={quantityRange[1]}
             />
           </div>
         </div>
@@ -108,7 +112,7 @@ export default function UnifiedProductListPage() {
               value={co2Range[0]}
               onChange={(e) => setCO2Range([Number(e.target.value), co2Range[1]])}
               className="px-2 py-1 border rounded w-full text-sm bg-white text-gray-900"
-              max={maxCO2}
+              max={co2Range[1]}
             />
             <input
               type="number"
@@ -116,7 +120,7 @@ export default function UnifiedProductListPage() {
               value={co2Range[1]}
               onChange={(e) => setCO2Range([co2Range[0], Number(e.target.value)])}
               className="px-2 py-1 border rounded w-full text-sm bg-white text-gray-900"
-              max={maxCO2}
+              max={co2Range[1]}
             />
           </div>
         </div>

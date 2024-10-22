@@ -20,7 +20,10 @@ export const metadata = {
   description: 'Sign-in to your account',
 };
 
-export default function SigninPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function SigninPage(
+  props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
+) {
+  const searchParams = await props.searchParams;
   const error = searchParams.error;
 
   return (

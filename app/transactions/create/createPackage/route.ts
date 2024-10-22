@@ -5,7 +5,8 @@
  * @module
  */
 
-import app from '@/app/blockchain/src';
+import { natixarFactory } from '@/app/blockchain/src';
+import { Utils } from '@/app/blockchain/src/ClientSDK/Utils';
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { z } from 'zod';
@@ -77,10 +78,6 @@ const userInputsSchema = z.object({
   transporterEmail: z.string().email("Invalid email format"), // Ensure valid email format for transporterEmail
   product: z.string().min(1, "product cannot be empty"),
   quantity: z.number().gt(1, "quantity must be greater than 1"),
-  account: z.object({
-    keyId: z.string().min(1, "keyId is required"),
-    address: z.string().min(1, "address is required"),
-  }),
 });
 
 
@@ -114,26 +111,20 @@ const userInputsSchema = z.object({
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const validatedInputs = userInputsSchema.safeParse(await request.json());
-    if (!validatedInputs.success) {
+    if (!validatedInputs.success || !groupId) {
       throw new Error(`${validatedInputs.error}`);
     }
-    const { from, to, transporterEmail, product, quantity, account } = validatedInputs.data;
-    // Create the package without transporter
-    const createPackageWithoutTransporterReceipt = await app.createPackageWithoutTransporter(process.env.BLOCKCHAIN_NATIXAR_FACTORY as string, {
-      from,
-      to,
-      product,
-      quantity,
-    }).signAndSend(account);
+    const { from, to, transporterEmail, product, quantity } = validatedInputs.data;
 
+    // Create the package without transporter
+    const createPackageWithoutTransporterReceipt = await natixarFactory.method("createPackageWithoutTransporter").params(from, to, product, Utils.toUint18Decimals(quantity)).sendTransaction(groupId);
     const transactionAddress = createPackageWithoutTransporterReceipt.parsedLog?.CreatePackageWithoutTransporter.params.packageWithoutTransporter;
 
     // Fetch emails for from and to
-    console.log(from, to)
     const fromEmail = await fetchEmailByBlockchainAddress(from);
     const toEmail = await fetchEmailByBlockchainAddress(to);
-    console.log(fromEmail, toEmail)
     if (!fromEmail || !toEmail) {
       throw new Error('Failed to retrieve email addresses for from or to.');
     }
@@ -143,18 +134,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                                   Please fill out the emissions form at the following link:
                                   http://localhost:3000/transport/emissions-form?transactionAddress=${transactionAddress}&email=${transporterEmail}`;
 
-    const toto = await sendEmail(transporterEmail, 'New Transport Assignment', transporterEmailText);
-    console.log(toto)
 
     // Send emails to from and to
     const commonText = `A transaction is involving you:
-                        From: ${from} (Blockchain Address: ${from})
-                        To: ${to} (Blockchain Address: ${to})
-                        Product: ${product}
-                        Quantity: ${quantity} kg`;
+    From: ${from} (Blockchain Address: ${from})
+    To: ${to} (Blockchain Address: ${to})
+    Product: ${product}
+    Quantity: ${quantity} kg`;
 
-    await sendEmail(fromEmail, 'Transaction Notification', commonText);
-    await sendEmail(toEmail, 'Transaction Notification', commonText);
+    await Promise.all([
+      await sendEmail(transporterEmail, 'New Transport Assignment', transporterEmailText),
+      await sendEmail(fromEmail, 'Transaction Notification', commonText),
+      await sendEmail(toEmail, 'Transaction Notification', commonText)
+    ]);
+
+    console.log(`http://localhost:3000/transport/emissions-form?transactionAddress=${transactionAddress}&email=${transporterEmail}`);
 
     return NextResponse.json({ message: 'Package created and emails sent successfully.' }, { status: 200 });
   } catch (error) {

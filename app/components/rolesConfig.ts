@@ -24,6 +24,7 @@ const rolesConfig: Record<Role, Link[]> = {
     { label: 'Transactions list', path: '/transactions/list' },
   ],
   manufacturer: [
+    { label: 'Commodities stock', path: '/product/list' },
     { label: 'Scan new product', path: '/product/unload' },
     { label: 'Products list', path: '/manufacturer' },
   ],

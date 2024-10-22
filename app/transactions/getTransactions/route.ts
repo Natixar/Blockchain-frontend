@@ -6,8 +6,7 @@
  */
 
 import { mineralInterface, natixarFactory, packageWithoutTransporterInterface } from '@/app/blockchain/src';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
-import { Utils } from '@/app/blockchain/src/Utils';
+import { Utils } from '@/app/blockchain/src/ClientSDK/Utils';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -31,12 +30,13 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
     const transactionAddress = request.nextUrl.searchParams.get('transactionAddress');
+    const blockchainAddress = request.headers.get('X-FusionAuth-BlockchainAddress') || '';
     try {
         if (transactionAddress) {
-            return NextResponse.json(await getPackage(transactionAddress, Mine_1));
+            return NextResponse.json(await getPackage(transactionAddress, blockchainAddress));
         } else {
-            const transactionAddresses: string[] = await natixarFactory.method("getPackagesWithoutTransporter").call(Mine_1);
-            const transactionDetailsPromises = transactionAddresses.map(transactionAddress => getPackage(transactionAddress, Mine_1));
+            const transactionAddresses: string[] = await natixarFactory.method("getPackagesWithoutTransporter").params(blockchainAddress).call();
+            const transactionDetailsPromises = transactionAddresses.map(transactionAddress => getPackage(transactionAddress, blockchainAddress));
             return NextResponse.json(await Promise.all(transactionDetailsPromises));
         }
     } catch (error) {
@@ -45,18 +45,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 }
 
-async function getPackage(transactionAddress: string, accountAddress: string) {
+async function getPackage(transactionAddress: string, blockchainAddress: string) {
     let from: string = await packageWithoutTransporterInterface.address(transactionAddress).method('getFrom').call();
     from = await Utils.addressToName(from.toLowerCase());
     let to: string = await packageWithoutTransporterInterface.address(transactionAddress).method('getTo').call();
     to = await Utils.addressToName(to.toLowerCase());
-    const productAddress: string = await packageWithoutTransporterInterface.address(transactionAddress).method('getMineral').call();
-    // const status = await this.packageWithoutTransporter.contract(productAddress).methods.getStatus().call();
-    const name = await mineralInterface.address(productAddress).method('name').call();
-    const symbol = await mineralInterface.address(productAddress).method('symbol').call();
-    const price = Math.round(Number(await mineralInterface.address(productAddress).method('price').call()) / Math.pow(10, 18));
-    const quantity = Math.round(Number(await packageWithoutTransporterInterface.address(transactionAddress).method('getAmount').call()) / Math.pow(10, 18));
-    const co2 = Math.round(Number(await mineralInterface.address(productAddress).method('footprintOf').call(accountAddress)) / Math.pow(10, 18));
+    const commodityAddress: string = await packageWithoutTransporterInterface.address(transactionAddress).method('getMineral').call();
+    // const status = await this.packageWithoutTransporter.contract(commodityAddress).methods.getStatus().call();
+    const name = await mineralInterface.address(commodityAddress).method('name').call();
+    const symbol = await mineralInterface.address(commodityAddress).method('symbol').call();
+    const price = Math.round(Number(await mineralInterface.address(commodityAddress).method('price').call()) / Math.pow(10, 18));
+    const quantity = Math.round(Number(await packageWithoutTransporterInterface.address(transactionAddress).method('getAmount').params(blockchainAddress).call()) / Math.pow(10, 18));
+    const co2 = Math.round(Number(await mineralInterface.address(commodityAddress).method('footprintOf').params(blockchainAddress).call()) / Math.pow(10, 18));
 
     return {
         address: transactionAddress.substring(2, 8).toUpperCase(),

@@ -1,8 +1,8 @@
-export class Factory {
+export abstract class Factory {
     private static instance: Factory | null = null;
 
-    static async init(apiUrl: string, fetchJwt: () => Promise<any>) {
-        Factory.instance = new Factory(apiUrl, await fetchJwt(), fetchJwt);
+    static async init(apiUrl: string, publicKey: string, fetchJwt: () => Promise<any>) {
+        Factory.instance = new ClientSDK(apiUrl, publicKey, await fetchJwt(), fetchJwt);
     }
 
     public static get singleton() {
@@ -13,11 +13,20 @@ export class Factory {
     }
 
     readonly apiUrl: string | null = null;
+
+    constructor(apiUrl: string) {
+        this.apiUrl = apiUrl;
+    }
+}
+
+export class ClientSDK extends Factory {
+    readonly publicKey: string | null = null;
     public jwt: string | null = null;
     readonly fetchJwt: () => Promise<string>;
     
-    private constructor(apiUrl: string, jwt: string, fetchJwt: () => Promise<string>) {
-        this.apiUrl = apiUrl;
+    constructor(apiUrl: string, publicKey: string, jwt: string, fetchJwt: () => Promise<string>) {
+        super(apiUrl);
+        this.publicKey = publicKey;
         this.jwt = jwt;
         this.fetchJwt = fetchJwt;
     }

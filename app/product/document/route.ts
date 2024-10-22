@@ -6,18 +6,15 @@
  */
 
 import { mineralInterface } from '@/app/blockchain/src';
+import { ethers } from 'ethers';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
 /**
- * Schema to validate common user inputs, including the product address and account details.
+ * Schema to validate common user inputs, including the product address.
  */
 const userInputsSchema = z.object({
-  productAddress: z.string().min(1, "productAddress cannot be empty"),
-  account: z.object({
-    keyId: z.string().min(1, "keyId is required"),
-    address: z.string().min(1, "address is required"),
-  })
+  commodityAddress: z.string().min(1, "commodityAddress cannot be empty")
 });
 
 /**
@@ -58,22 +55,23 @@ const removeDocumentSchema = userInputsSchema.merge(
  * fetch('/product/document', {
  *   method: 'POST',
  *   body: JSON.stringify({
- *     productAddress: '0xProductAddress',
+ *     commodityAddress: '0xd6zed16z4e135d',
  *     documentHashes: ['hash1', 'hash2'],
  *   }),
  * });
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const parsedInputs = addDocumentsSchema.safeParse(await request.json());
-    if (!parsedInputs.success) {
+    if (!parsedInputs.success || !groupId) {
       throw new Error(`${parsedInputs.error}`);
     }
-    const { productAddress, documentHashes, account } = parsedInputs.data;
+    const { commodityAddress, documentHashes } = parsedInputs.data;
 
     // Process each document hash and add it to the blockchain
     for (const documentHash of documentHashes) {
-      await mineralInterface.address(productAddress).method("addDocument").sendTransaction(documentHash);
+      await mineralInterface.address(commodityAddress).method("addDocument").params(ethers.keccak256(ethers.toUtf8Bytes(documentHash))).sendTransaction(groupId);
     }
 
     return NextResponse.json({ message: 'Documents added successfully.' });
@@ -101,20 +99,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
  * fetch('/product/document', {
  *   method: 'DELETE',
  *   body: JSON.stringify({
- *     productAddress: '0xProductAddress',
+ *     commodityAddress: '0xd6zed16z4e135d',
  *     documentHash: 'hash1',
  *   })
  * });
  */
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const parsedInputs = removeDocumentSchema.safeParse(await request.json());
-    if (!parsedInputs.success) {
+    if (!parsedInputs.success || !groupId) {
       throw new Error(`${parsedInputs.error}`);
     }
-    const { productAddress, documentHash, account } = parsedInputs.data;
+    const { commodityAddress, documentHash } = parsedInputs.data;
 
-    await mineralInterface.address(productAddress).method("removeDocument").sendTransaction(documentHash);
+    await mineralInterface.address(commodityAddress).method("removeDocument").params(documentHash).sendTransaction(groupId);
 
     return NextResponse.json({ message: 'Document removed successfully.' });
   } catch (error) {
@@ -126,7 +125,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 /**
  * GET handler for retrieving all documents associated with a product on the blockchain.
  * 
- * @param {NextRequest} request - The incoming request object containing the `productAddress` as a query parameter.
+ * @param {NextRequest} request - The incoming request object containing the `commodityAddress` as a query parameter.
  * @returns {Promise<NextResponse>} A JSON response with the retrieved documents or an error message.
  * 
  * @throws {Error} Throws an error if the product address is missing or if the blockchain request fails.
@@ -138,20 +137,21 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
  * 
  * @example
  * // Example of an API request to this route:
- * fetch('/product/document?productAddress=0xProductAddress', {
+ * fetch('/product/document?commodityAddress=0xd6zed16z4e135d', {
  *   method: 'GET'
  * });
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const productAddress = request.nextUrl.searchParams.get('productAddress');
-    if (!productAddress) {
+    const commodityAddress = request.nextUrl.searchParams.get('commodityAddress');
+    if (!commodityAddress) {
       return NextResponse.json({ error: 'Missing product address' }, { status: 400 });
     }
 
     // Retrieve documents associated with the product from the blockchain
-    const documents = await mineralInterface.address(productAddress).method("getDocuments").call()
-    return NextResponse.json({ documents });
+    const documents = await mineralInterface.address(commodityAddress).method("getDocuments").call();
+
+    return NextResponse.json(documents);
   } catch (error) {
     console.error('Error retrieving documents:', error);
     return NextResponse.json({ error: 'Failed to retrieve documents.' }, { status: 500 });

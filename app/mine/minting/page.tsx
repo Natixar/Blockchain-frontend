@@ -12,7 +12,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 import { Product } from '@/app/product/Tproduct';
 
 export default function MintingForm() {
@@ -33,7 +32,7 @@ export default function MintingForm() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/blockchain/api/product/list?accountAddress=${Mine_1.address}`);
+        const response = await fetch(`/product/getProducts`);
         if (!response.ok) {
           throw new Error('Failed to fetch minerals');
         }

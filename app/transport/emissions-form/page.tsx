@@ -17,12 +17,15 @@
 
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, use } from 'react';
 import Step3DocumentUpload from './Step3DocumentUpload';
 import Step1TransportData from './Step1TransportData';
 import Step2LoadCarried from './Step2LoadCarried';
 
-export default function TransportForm({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default function TransportForm(
+    props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
+) {
+    const searchParams = use(props.searchParams);
     const transactionAddress = searchParams.transactionAddress as string | undefined;
     const email = searchParams.email as string | undefined;
 

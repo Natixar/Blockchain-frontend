@@ -35,7 +35,10 @@ async function handleSignup(formData: FormData) {
     return response.json();
 }
 
-export default async function SignupPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function SignupPage(
+    props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }
+) {
+    const searchParams = await props.searchParams;
     const error = searchParams.error;
 
     async function handleSubmit(formData: FormData) {

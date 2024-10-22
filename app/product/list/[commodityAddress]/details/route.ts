@@ -5,7 +5,7 @@
  * @module
  */
 
-import app from '@/app/blockchain/src';
+import { mineralInterface } from '@/app/blockchain/src';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -13,16 +13,16 @@ import { NextRequest, NextResponse } from 'next/server';
  * 
  * @param {object} context - The context object containing route parameters.
  * @param {object} context.params - The parameters extracted from the route.
- * @param {string} context.params.productAddress - The product's blockchain address from the route.
+ * @param {string} context.params.commodityAddress - The product's blockchain address from the route.
  * 
  * @returns {Promise<NextResponse>} A JSON response with the rounded product data, including price, quantity, and CO2 emissions, or an error message.
  * 
- * @throws {Error} Will throw if the `productAddress` is missing, if the product is not found, or if the blockchain request fails.
+ * @throws {Error} Will throw if the `commodityAddress` is missing, if the product is not found, or if the blockchain request fails.
  * 
  * @remarks
  * This function:
  * 2. Fetches all products associated an account from the blockchain.
- * 3. Finds the specific product by `productAddress` and rounds its numerical data (price, quantity, CO2).
+ * 3. Finds the specific product by `commodityAddress` and rounds its numerical data (price, quantity, CO2).
  * 4. Returns the rounded product data or an appropriate error message.
  * 
  * @example
@@ -42,32 +42,38 @@ import { NextRequest, NextResponse } from 'next/server';
  * }
  */
 
-export async function GET(request: NextRequest, { params }: { params: { productAddress: string } }): Promise<NextResponse> {
+export async function GET(
+  request: NextRequest,
+  props: { params: Promise<{ commodityAddress: string }> }
+): Promise<NextResponse> {
+  const params = await props.params;
   try {
-    const accountAddress = request.nextUrl.searchParams.get('accountAddress');
-    if (!accountAddress) {
-      return NextResponse.json({ error: 'Missing account address' }, { status: 400 });
-    }
-
-    const { productAddress } = params;
-    if (!productAddress) {
+    const { commodityAddress } = params;
+    if (!commodityAddress) {
       return NextResponse.json({ error: 'Missing product address in URL' }, { status: 400 });
     }
 
-    // Fetch all products from the blockchain for the given account address
-    const products = await app.getMinerals(process.env.BLOCKCHAIN_NATIXAR_FACTORY as string, accountAddress);
+    const blockchainAddress = request.headers.get('X-FusionAuth-BlockchainAddress') || '';
+    const name = await mineralInterface.address(commodityAddress).method('name').call();
+    const symbol = await mineralInterface.address(commodityAddress).method('symbol').call();
+    const price = Number(await mineralInterface.address(commodityAddress).method('price').call()) / Math.pow(10, 18);
+    const quantity = Number(await mineralInterface.address(commodityAddress).method('balanceOf').params(blockchainAddress).call()) / Math.pow(10, 18);
+    const co2 = Number(await mineralInterface.address(commodityAddress).method('footprintOf').params(blockchainAddress).call()) / Math.pow(10, 18);
 
-    // Find the specific product using the product address
-    const product = products.find(product => product.address === productAddress);
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-    }
+    const product = {
+      address: commodityAddress,
+      name,
+      symbol,
+      price,
+      quantity,
+      co2
+    };
 
     const roundedData = {
       ...product,
       price: Math.round(product.price),
-      quantity: Math.round(product.quantity),
-      co2: Math.round(product.co2!),
+      quantity: Math.round(product.quantity / 1000),
+      co2: Math.round(product.co2 / 1000),
     };
 
     return NextResponse.json(roundedData);

@@ -1,11 +1,4 @@
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//     poweredByHeader: false,  
-// };
-
-// export default nextConfig;
-
-
+import type { NextConfig } from 'next';
 import withSerwistInit from "@serwist/next";
 
 const withSerwist = withSerwistInit({
@@ -14,16 +7,10 @@ const withSerwist = withSerwistInit({
 });
 
 export default withSerwist({
-    /** @type {import('next').NextConfig} */
     poweredByHeader: false,
     output: 'standalone',
     experimental: {
       taint: true,
       typedRoutes: true,
     },
-    // compiler: {
-    //   removeConsole: {
-    //     exclude: ['error'],
-    //   },
-    // },
-});
+} as NextConfig);

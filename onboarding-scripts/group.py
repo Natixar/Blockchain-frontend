@@ -37,21 +37,27 @@ def get_roles():
     finally:
         connection.close()
 
-def create_group(name, blockchain_address, role_ids):
+def create_group(name, blockchain_address, role_ids, email, group_id=None):
     connection = http.client.HTTPSConnection(BASE_URL)
     try:
+        group_data = {
+            "name": name,
+            "data": {
+                "blockchainAddress": blockchain_address,
+                "email": email
+            }
+        }
+
         payload = {
-            "group": {
-                "name": name,
-                "data": {
-                    "blockchainAddress": blockchain_address
-                }
-            },
+            "group": group_data,
             "roleIds": role_ids
         }
         json_payload = json.dumps(payload)
 
-        connection.request("POST", "/api/group", body=json_payload, headers=headers)
+        # Include groupId in the URL if specified
+        url = f"/api/group/{group_id}" if group_id else "/api/group"
+
+        connection.request("POST", url, body=json_payload, headers=headers)
         response = connection.getresponse()
 
         data = response.read()
@@ -69,13 +75,11 @@ def create_group(name, blockchain_address, role_ids):
                 print("Response JSON:")
                 print(json.dumps(errors, indent=2))
                 
-                # Print general errors if they exist
                 if 'generalErrors' in errors:
                     print("General Errors:")
                     for error in errors['generalErrors']:
                         print(f"- Code: {error.get('code')}, Message: {error.get('message')}")
                 
-                # Print field errors if they exist
                 if 'fieldErrors' in errors:
                     print("Field Errors:")
                     for field, field_errors in errors['fieldErrors'].items():
@@ -95,7 +99,6 @@ def create_group(name, blockchain_address, role_ids):
         return None
     finally:
         connection.close()
-
 
 def select_roles(roles):
     print("Please select the roles you want to assign to the group:")
@@ -128,6 +131,15 @@ def main():
         print("Blockchain address cannot be empty.")
         sys.exit(1)
 
+    # Get the email
+    email = input("Enter the email: ").strip()
+    if not email:
+        print("Email cannot be empty.")
+        sys.exit(1)
+
+    # Optional: Get a custom group ID
+    group_id = input("Enter the group ID (leave empty to auto-generate): ").strip() or None
+
     roles = get_roles()
     if not roles:
         print("No roles found for the application.")
@@ -138,7 +150,7 @@ def main():
         print("No roles selected.")
         sys.exit(1)
 
-    group = create_group(group_name, blockchain_address, selected_role_ids)
+    group = create_group(group_name, blockchain_address, selected_role_ids, email, group_id)
     if group:
         print("Group created successfully:", json.dumps(group, indent=2))
     else:

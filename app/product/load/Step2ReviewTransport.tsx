@@ -7,7 +7,7 @@ interface Step2Props {
 export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
   return (
     <div className="flex flex-col items-center w-full">
-      <h1 className="text-3xl text-center mb-10 underline decoration-green-500">
+      <h1 className="text-3xl font-light text-center text-blue-950 mb-8 underline decoration-green-500">
         Review Transport Information
       </h1>
 
@@ -27,7 +27,7 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
             <div className="flex justify-between items-center">
               <span className="text-gray-500">CO2 Emissions</span>
               <span className="text-gray-900 font-medium">
-                {transactionInfo.transportEmissions || 0} Kg
+                {Math.round(transactionInfo.transportEmissions) || 0} Kg
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -63,13 +63,13 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
           </h2>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product Name</span>
+              <span className="text-gray-500">Commodity</span>
               <span className="text-gray-900 font-medium">
                 {transactionInfo.product?.name || 'N/A'}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product Symbol</span>
+              <span className="text-gray-500">Symbol</span>
               <span className="text-gray-900 font-medium">
                 {transactionInfo.product?.symbol || 'N/A'}
               </span>
@@ -87,7 +87,7 @@ export default function Step2ReviewTransport({ transactionInfo }: Step2Props) {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Product CO2</span>
+              <span className="text-gray-500">Commodity CO2eq</span>
               <span className="text-gray-900 font-medium">
                 {transactionInfo.product?.co2 || 0} Kg
               </span>

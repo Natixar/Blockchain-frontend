@@ -5,9 +5,8 @@
  * @module
  */
 
-import { mineralInterface, natixarFactory } from '@/app/blockchain/src';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
-import { NextResponse } from 'next/server';
+import { mineralInterface } from '@/app/blockchain/src';
+import { NextRequest, NextResponse } from 'next/server';
 
 /**
  * GET handler for retrieving products associated with an account address from the blockchain.
@@ -46,42 +45,56 @@ import { NextResponse } from 'next/server';
  *   }
  * ]
  */
-export async function GET(): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const blockchainAddress = request.headers.get('X-FusionAuth-BlockchainAddress') || '';
+    if (!blockchainAddress) {
+      return NextResponse.json({ error: 'Blockchain address is required.' }, { status: 400 });
+    }
 
-    // Fetch products from the blockchain associated with the account address
-    const productAddresses: string[] = await natixarFactory.method("getMinerals").call(Mine_1)
-    console.log(productAddresses)
-    const productDetailsPromises = productAddresses.map(async (productAddress) => {
-      const name = await mineralInterface.address(productAddress).method('name').call();
-      const symbol = await mineralInterface.address(productAddress).method('symbol').call();
-      const price = Number(await mineralInterface.address(productAddress).method('price').call()) / Math.pow(10, 18);
-      const quantity = Number(await mineralInterface.address(productAddress).method('balanceOf').call(Mine_1)) / Math.pow(10, 18);
-      const co2 = Number(await mineralInterface.address(productAddress).method('footprintOf').call(Mine_1)) / Math.pow(10, 18);
+    // Fetch all tokens owned by the user
+    const tokenListData = await fetchFromExplorer('?module=account&action=tokenlist', { address: blockchainAddress });
+    const tokenAddresses: string[] = tokenListData.result.map((token: any) => token.contractAddress);
 
-      return {
-        address: productAddress,
-        name,
-        symbol,
-        price,
-        quantity,
-        co2
-      };
-    });
+    // Fetch and process product details for each token
+    const products = await Promise.all(tokenAddresses.map((contractAddress) => getProductDetails(contractAddress, blockchainAddress)));
 
-    const products = await Promise.all(productDetailsPromises);
-
-    // Round numerical product data
-    const roundedData = products.map((product) => ({
-      ...product,
-      price: Math.round(product.price),
-      quantity: Math.round(product.quantity),
-      co2: Math.round(product.co2!),
-    }));
-
-    return NextResponse.json(roundedData);
+    return NextResponse.json(products);
   } catch (error) {
-    console.error(error);
+    console.error('Error retrieving products:', error);
     return NextResponse.json({ error: 'Failed to retrieve products.' }, { status: 500 });
   }
+}
+
+/**
+ * Utility function to fetch data from the blockchain explorer API.
+ */
+async function fetchFromExplorer(endpoint: string, params: Record<string, string>) {
+  const url = new URL(endpoint, `${process.env.BLOCKCHAIN_EXPLORER_URL}/api`);
+  Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error(`Error fetching data: ${response.statusText}`);
+  return response.json();
+}
+
+/**
+ * Retrieves and processes product details with balance fetched directly via RPC.
+ */
+async function getProductDetails(contractAddress: string, blockchainAddress: string) {
+  const [name, symbol, rawPrice, rawCo2, rawBalance] = await Promise.all([
+    mineralInterface.address(contractAddress).method('name').call(),
+    mineralInterface.address(contractAddress).method('symbol').call(),
+    mineralInterface.address(contractAddress).method('price').call(),
+    mineralInterface.address(contractAddress).method('footprintOf').params(blockchainAddress).call(),
+    mineralInterface.address(contractAddress).method('balanceOf').params(blockchainAddress).call(),
+  ]);
+
+  return {
+    address: contractAddress,
+    name,
+    symbol,
+    price: Math.round(Number(rawPrice) / 1e18),       // Convert price from wei and round
+    quantity: Math.round(Number(rawBalance) / 1e21), // Convert balance from wei, scale down by 1000, and round
+    co2: Math.round(Number(rawCo2) / 1e18 / 1000),   // Convert footprint from wei, divide by 1000, and round
+  };
 }

@@ -55,7 +55,7 @@ export interface FileUploadProps {
  * 
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/File} for more information on the File API.
  */
-export default function FileUpload({ onFileUpload }: FileUploadProps): JSX.Element {
+export default function FileUpload({ onFileUpload }: FileUploadProps) {
   // State to store the list of uploaded files
   const [files, setFiles] = useState<File[]>([]);
 

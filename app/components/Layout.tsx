@@ -13,7 +13,7 @@ import { cookies } from 'next/headers';
 export default async function MainLayout({ children }: { children: ReactNode }) {
   async function validateJwt() {
     try {
-      const token = cookies().get('access_token')?.value;
+      const token = (await cookies()).get('access_token')?.value;
       const response = await fetch(`${process.env.FUSIONAUTH_ISSUER}/api/jwt/validate`, {
         method: 'GET',
         headers: {

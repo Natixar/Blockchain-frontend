@@ -29,7 +29,7 @@ export async function GET(request: Request) {
   const redirectUrl = new URL('/auth/signin', request.url);
 
   // Get tokens from cookies
-  const access_token = cookies().get('access_token')?.value;
+  const access_token = (await cookies()).get('access_token')?.value;
 
   // Call FusionAuth's Logout API
   if (access_token) {
@@ -55,8 +55,8 @@ export async function GET(request: Request) {
   }
 
   // Clear cookies
-  cookies().delete('access_token');
-  cookies().delete('refresh_token');
+  (await cookies()).delete('access_token');
+  (await cookies()).delete('refresh_token');
 
   // Redirect to sign-in page
   const response = NextResponse.redirect(redirectUrl);

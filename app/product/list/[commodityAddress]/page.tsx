@@ -10,73 +10,67 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import crypto from 'crypto';
+import { useState, useEffect, use } from 'react';
 import FileUpload from '@/app/components/FileUpload';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
-import { Account } from '@/app/blockchain/src/Interface/Account';
 import { Product } from '../../Tproduct';
 import Link from 'next/link';
 
-async function fetchProductDetails(productAddress: string): Promise<Product> {
-  const response = await fetch(`/product/list/${productAddress}/details?accountAddress=${Mine_1.address}`);
+async function fetchProductDetails(commodityAddress: string): Promise<Product> {
+  const response = await fetch(`/product/list/${commodityAddress}/details`);
   if (!response.ok) {
     throw new Error('Failed to fetch product details');
   }
   return await response.json();
 }
 
-async function addDocumentsToProduct(mineralAddress: string, documentHashes: string[], account: Account) {
-  const response = await fetch('/blockchain/api/document', {
+async function fetchDocuments(commodityAddress: string): Promise<string[]> {
+  const response = await fetch(`/product/document?commodityAddress=${commodityAddress}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch product documents');
+  }
+  return await response.json();
+}
+
+async function addDocumentsToProduct(commodityAddress: string, documentHashes: string[]) {
+  const response = await fetch('/product/document', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ mineralAddress, documentHashes, account }),
+    body: JSON.stringify({ commodityAddress, documentHashes }),
   });
   if (!response.ok) {
     throw new Error('Failed to add documents');
   }
 }
 
-async function removeDocumentFromProduct(mineralAddress: string, documentHash: string, account: Account) {
-  const response = await fetch('/blockchain/api/document', {
+async function removeDocumentFromProduct(commodityAddress: string, documentHash: string) {
+  const response = await fetch('/product/document', {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ mineralAddress, documentHash, account }),
+    body: JSON.stringify({ commodityAddress, documentHash }),
   });
   if (!response.ok) {
     throw new Error('Failed to remove document');
   }
 }
 
-function calculateHash(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const data = reader.result as ArrayBuffer;
-      const hash = crypto.createHash('sha256').update(new Uint8Array(data)).digest('hex');
-      resolve(hash);
-    };
-    reader.onerror = () => reject('Error reading file');
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-export default function ProductDetailPage({ params }: { params: { productAddress: string } }) {
+export default function ProductDetailPage(props: { params: Promise<{ commodityAddress: string }> }) {
+  const params = use(props.params);
   const [product, setProduct] = useState<Product | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [newDocuments, setNewDocuments] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productData = await fetchProductDetails(params.productAddress);
-        setProduct(productData);
+        const productData = await fetchProductDetails(params.commodityAddress);
+        const documentHashes = await fetchDocuments(params.commodityAddress);
+        console.log(documentHashes)
+        setProduct({ ...productData, files: documentHashes });
       } catch (err) {
         setError('Failed to fetch product details.');
       } finally {
@@ -84,7 +78,7 @@ export default function ProductDetailPage({ params }: { params: { productAddress
       }
     };
     fetchData();
-  }, [params.productAddress]);
+  }, [params.commodityAddress]);
 
   const handleDocumentUpload = async (files: File[]) => {
     if (files.length === 0 || !product) return;
@@ -93,11 +87,11 @@ export default function ProductDetailPage({ params }: { params: { productAddress
     setError(null);
 
     try {
-      const hashes = await Promise.all(files.map(file => calculateHash(file)));
-      await addDocumentsToProduct(product.address, hashes, Mine_1);
-      const updatedProduct = await fetchProductDetails(params.productAddress);
-      setProduct(updatedProduct);
-      setNewDocuments([]);
+      const filenames = await Promise.all(files.map(file => file.name));
+      await addDocumentsToProduct(product.address, filenames);
+      const updatedProduct = await fetchProductDetails(params.commodityAddress);
+      const updatedDocuments = await fetchDocuments(params.commodityAddress);
+      setProduct({ ...updatedProduct, files: updatedDocuments });
     } catch {
       setError('Failed to upload documents.');
     } finally {
@@ -109,9 +103,10 @@ export default function ProductDetailPage({ params }: { params: { productAddress
     if (!product) return;
 
     try {
-      await removeDocumentFromProduct(product.address, hash, Mine_1);
-      const updatedProduct = await fetchProductDetails(params.productAddress);
-      setProduct(updatedProduct);
+      await removeDocumentFromProduct(product.address, hash);
+      const updatedProduct = await fetchProductDetails(params.commodityAddress);
+      const updatedDocuments = await fetchDocuments(params.commodityAddress);
+      setProduct({ ...updatedProduct, files: updatedDocuments });
     } catch {
       setError('Failed to delete document.');
     }

@@ -87,7 +87,7 @@ export async function handleSignin(formData: FormData) {
 			throw new Error('No roles found for the user');
 		}
 
-		cookies().set({
+		(await cookies()).set({
 			name: 'access_token',
 			value: token,
 			path: '/',
@@ -96,7 +96,7 @@ export async function handleSignin(formData: FormData) {
 			sameSite: 'strict',
 		});
 
-		cookies().set({
+		(await cookies()).set({
 			name: 'refresh_token',
 			value: refreshToken,
 			path: '/',

@@ -14,11 +14,7 @@ import { z } from 'zod';
  */
 const userInputsSchema = z.object({
   transactionAddress: z.string().min(1, "packageAddress cannot be empty"),
-  transportEmissions: z.number().gt(0, "co2Emissions must be greater than 0"),
-  account: z.object({
-    keyId: z.string().min(1, "keyId is required"),
-    address: z.string().min(1, "address is required"),
-  }),
+  transportEmissions: z.number().gt(0, "co2Emissions must be greater than 0")
 });
 
 /**
@@ -47,14 +43,15 @@ const userInputsSchema = z.object({
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const parsedInputs = userInputsSchema.safeParse(await request.json());
-    if (!parsedInputs.success) {
+    if (!parsedInputs.success || !groupId) {
       throw new Error(`${parsedInputs.error}`);
     }
     const { transactionAddress, transportEmissions } = parsedInputs.data;
 
     // Blockchain transaction to unload the package and close the package
-    await packageWithoutTransporterInterface.address(transactionAddress).method("unload").sendTransaction();
+    await packageWithoutTransporterInterface.address(transactionAddress).method("unload").sendTransaction(groupId);
 
     return NextResponse.json({ message: 'Package unloaded, transit completed, and package closed.' });
   } catch (error) {

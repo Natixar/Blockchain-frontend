@@ -8,18 +8,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { packageWithoutTransporterInterface } from '@/app/blockchain/src';
-import { Utils } from '@/app/blockchain/src/Utils';
+import { Utils } from '@/app/blockchain/src/ClientSDK/Utils';
 
 /**
  * Schema to validate user inputs for loading a package, including the transaction address, transport emissions, and account details.
  */
 const userInputsSchema = z.object({
   transactionAddress: z.string().min(1, "packageAddress cannot be empty"),
-  transportEmissions: z.number().gt(0, "co2Emissions must be greater than 0"),
-  account: z.object({
-    keyId: z.string().min(1, "keyId is required"),
-    address: z.string().min(1, "address is required"),
-  }),
+  transportEmissions: z.number().gt(0, "co2Emissions must be greater than 0")
 });
 
 /**
@@ -48,14 +44,15 @@ const userInputsSchema = z.object({
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const parsedInputs = userInputsSchema.safeParse(await request.json());
-    if (!parsedInputs.success) {
+    if (!parsedInputs.success || !groupId) {
       throw new Error(`${parsedInputs.error}`);
     }
     const { transactionAddress, transportEmissions } = parsedInputs.data;
 
     // Blockchain transaction to load the package and log transport emissions
-    await packageWithoutTransporterInterface.address(transactionAddress).method("load").sendTransaction(Utils.toUint18Decimals(transportEmissions));
+    await packageWithoutTransporterInterface.address(transactionAddress).method("load").params(Utils.toUint18Decimals(transportEmissions)).sendTransaction(groupId);
 
     return NextResponse.json({ message: 'Package loaded successfully' });
   } catch (error) {

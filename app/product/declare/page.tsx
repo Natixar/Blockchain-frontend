@@ -1,22 +1,7 @@
-/**
- * This module renders the `DefineProductForm` page, allowing users to declare a new product type or select from predefined categories.
- * The form supports dynamic switching between predefined products and custom product entries. 
- * It includes fields for product name, symbol, price, and a file upload feature for attaching relevant documents.
- * 
- * The form handles state management for both predefined and custom product types, providing feedback on successful or failed submissions, 
- * with a progress bar for visual indication of the submission process.
- * 
- * @see declareProductAction - Function to handle form submission to the server.
- * @see FileUpload2 - Component for file upload functionality.
- * 
- * @module
- */
-
 'use client';
 
 import { useState } from 'react';
 import FileUpload2 from '@/app/components/FileUpload2';
-import { declareProductAction } from './declareAction';
 import productCategories from './commodities.json';
 
 export default function DefineProductForm() {
@@ -73,13 +58,18 @@ export default function DefineProductForm() {
       }
     }
 
-        try {
-            const result = await declareProductAction(formData);
-            if (result) {
-                setFormState({ success: result.success, message: result.message });
-                const duration = 5000; // 5 seconds
-                const interval = 50; // Update every 50ms for a smoother transition
-                const step = 100 / (duration / interval);
+    try {
+      const response = await fetch('/product/declare/define', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (result) {
+        setFormState({ success: result.success, message: result.message });
+        const duration = 5000;
+        const interval = 50;
+        const step = 100 / (duration / interval);
 
         const timer = setInterval(() => {
           setProgress((prev) => {

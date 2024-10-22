@@ -9,13 +9,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Transaction } from '../Ttransaction';
-import { Mine_1 } from '@/app/blockchain/src/setupAccounts';
 
 async function fetchTransactions(): Promise<any> {
   try {
-    const response = await fetch(`/transactions/list/getTransactions?accountAddress=${Mine_1.address}`);
+    const response = await fetch(`/transactions/getTransactions`);
     if (!response.ok) {
       throw new Error('Failed to fetch transactions');
     }

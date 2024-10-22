@@ -5,13 +5,17 @@ import dynamic from 'next/dynamic';
 
 // Dynamically load APILoader, only on the client-side
 const APILoader = dynamic(
-  () => import('@googlemaps/extended-component-library/react').then(mod => mod.APILoader),
+  () => import('@googlemaps/extended-component-library/react').then(mod => ({
+    default: mod.APILoader
+  })),
   { ssr: false } // This ensures it is only loaded on the client side
 );
 
 // Dynamically load PlacePicker, only on the client-side
 const PlacePicker = dynamic(
-  () => import('@googlemaps/extended-component-library/react').then(mod => mod.PlacePicker),
+  () => import('@googlemaps/extended-component-library/react').then(mod => ({
+    default: mod.PlacePicker
+  })),
   { ssr: false } // This ensures it is only loaded on the client side
 );
 
@@ -60,7 +64,7 @@ export default function Step4TransportData({ onChange }: Step4Props) {
 
   return (
     <div className="w-full mx-auto mb-6">
-      <h1 className="text-3xl font-light text-center mb-8 underline decoration-green-500">
+      <h1 className="text-3xl font-light text-center text-blue-950 mb-8 underline decoration-green-500">
         Specify relevant transport data
       </h1>
       <APILoader apiKey="AIzaSyAqVCBp-Kd5hP4wEvaGbqLOMx5S8ZfbPas" solutionChannel="GMP_GCC_placepicker_v1" />

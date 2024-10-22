@@ -4,7 +4,8 @@
  * @module
  */
 
-import app from '@/app/blockchain/src';
+import { mineralInterface } from '@/app/blockchain/src';
+import { Utils } from '@/app/blockchain/src/ClientSDK/Utils';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -12,13 +13,9 @@ import { z } from 'zod';
  * Schema to validate user inputs, including commodity address, quantity, footprint, and account details (keyId and address).
  */
 const userInputsSchema = z.object({
-  productAddress: z.string().min(1, "productAddress cannot be empty"), // Product address should be non-empty
+  commodityAddress: z.string().min(1, "commodityAddress cannot be empty"), // Product address should be non-empty
   quantity: z.number().gt(0, "quantity must be greater than 0"), // Quantity should be greater than 0
   footprint: z.number().gt(0, "footprint must be greater than 0"), // Footprint should be greater than 0
-  account: z.object({
-    keyId: z.string().min(1, "keyId is required"), // Key ID should be non-empty
-    address: z.string().min(1, "address is required"), // Address should be non-empty
-  })
 });
 
 /**
@@ -39,7 +36,7 @@ const userInputsSchema = z.object({
  * fetch('/mine/minting/mint', {
  *   method: 'POST',
  *   body: JSON.stringify({
- *     commodityAddress: '0xProductAddress123',
+ *     commodityAddress: '0xcommodityAddress123',
  *     quantity: 10,
  *     footprint: 5,
  *   })
@@ -47,15 +44,16 @@ const userInputsSchema = z.object({
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const groupId = request.headers.get('X-FusionAuth-GroupId');
     const parsedInputs = userInputsSchema.safeParse(await request.json());
-    if (!parsedInputs.success) {
+    if (!parsedInputs.success || !groupId) {
       throw new Error(`${parsedInputs.error}`);
     }
 
-    const { productAddress, quantity, footprint, account } = parsedInputs.data;
+    const { commodityAddress, quantity, footprint } = parsedInputs.data;
 
-    // Call the blockchain function to mint a product, passing the product data and account info.
-    await app.mintProduct(productAddress, { quantity, footprint }).signAndSend(account);
+    // Call the blockchain function to mint a commodity, passing the commodity data.
+    await mineralInterface.address(commodityAddress).method("mint").params(Utils.toUint18Decimals(quantity), Utils.toUint18Decimals(footprint)).sendTransaction(groupId);
 
     return NextResponse.json({ message: 'Product minted successfully' });
   } catch (error: unknown) {

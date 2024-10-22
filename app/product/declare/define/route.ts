@@ -1,30 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mineralInterface, natixarFactory } from '@/app/blockchain/src';
-import { Utils } from '@/app/blockchain/src/Utils';
-import { createHash } from 'crypto';
-import fs from 'fs/promises';
+import { Utils } from '@/app/blockchain/src/ClientSDK/Utils';
+import { ethers } from 'ethers';
 
 const ACCEPTABLE_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-
-// Helper function to calculate file hash
-async function calculateFileHash(filePath: string): Promise<string> {
-  const fileBuffer = await fs.readFile(filePath);
-  const fullHash = createHash('sha256').update(fileBuffer).digest('hex');
-  const truncatedHash = fullHash.slice(0, 32); // Take the first 32 characters (128 bits)
-
-  // Convert the truncated hash from hex to a BigInt
-  let hashInt = BigInt('0x' + truncatedHash);
-
-  // Define the maximum value for uint128 validation
-  const maxUint128 = BigInt('0xffffffffffffffffffffffffffffffff');
-
-  // Force the hash to fit within the uint128 range by applying a bitwise AND with the max uint128 value
-  hashInt = hashInt & maxUint128;
-
-  // Return the forced valid uint128 value as a hexadecimal string
-  return hashInt.toString();
-}
 
 // The main POST handler for declaring a product
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -50,25 +30,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     }
 
+    const groupId = req.headers.get('X-FusionAuth-GroupId') || '';
+
     try {
       // Declare custom product using the blockchain method
-      const declareProductReceipt = await natixarFactory.method("createMineral").sendTransaction(name, symbol, Utils.toUint18Decimals(price));
-      console.log(declareProductReceipt.parsedLog?.CreateMineral)
-      const mineralAddress: string = declareProductReceipt.parsedLog?.CreateMineral.params.mineral;
-      const documentHashes: string[] = [];
+      const declareProductReceipt = await natixarFactory.method("createMineral").params(name, symbol, Utils.toUint18Decimals(price)).sendTransaction(groupId);
+      const commodityAddress: string = declareProductReceipt.parsedLog?.CreateMineral.params.mineral;
+      const documentNames: string[] = [];
 
-      // Process each file: save temporarily, calculate hash, and remove the file
+      // Process each file: capture the filename only
       for (const file of files) {
-        const filePath = `/tmp/${file.name}`;
-        await fs.writeFile(filePath, Buffer.from(await file.arrayBuffer()));
-        const hash = await calculateFileHash(filePath);
-        documentHashes.push(hash);
-        await fs.unlink(filePath); // Clean up the temporary file
+        documentNames.push(file.name);
       }
 
       // Add document hashes to the blockchain
-      for (const documentHash of documentHashes) {
-        await mineralInterface.address(mineralAddress).method("addDocument").sendTransaction(documentHash);
+      for (const documentName of documentNames) {
+        await mineralInterface.address(commodityAddress).method("addDocument").params(ethers.keccak256(ethers.toUtf8Bytes(documentName))).sendTransaction(groupId);
       }
 
       return NextResponse.json({ success: true, message: 'Product declared successfully' });
