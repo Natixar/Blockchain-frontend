@@ -57,8 +57,8 @@ export async function GET(
     const name = await mineralInterface.address(commodityAddress).method('name').call();
     const symbol = await mineralInterface.address(commodityAddress).method('symbol').call();
     const price = Number(await mineralInterface.address(commodityAddress).method('price').call()) / Math.pow(10, 18);
-    const quantity = Number(await mineralInterface.address(commodityAddress).method('balanceOf').params(blockchainAddress).call()) / Math.pow(10, 18);
-    const co2 = Number(await mineralInterface.address(commodityAddress).method('footprintOf').params(blockchainAddress).call()) / Math.pow(10, 18);
+    const quantity = Number(await mineralInterface.address(commodityAddress).method('balanceOf').params(blockchainAddress).call()) / Math.pow(10, 18) / 1000;
+    const co2 = Number(await mineralInterface.address(commodityAddress).method('footprintOf').params(blockchainAddress).call()) / Math.pow(10, 18) / 1000;
 
     const product = {
       address: commodityAddress,
@@ -72,8 +72,8 @@ export async function GET(
     const roundedData = {
       ...product,
       price: Math.round(product.price),
-      quantity: Math.round(product.quantity / 1000),
-      co2: Math.round(product.co2 / 1000),
+      quantity: product.quantity.toFixed(2),
+      co2: product.co2.toFixed(2),
     };
 
     return NextResponse.json(roundedData);

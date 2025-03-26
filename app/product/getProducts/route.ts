@@ -94,7 +94,7 @@ async function getProductDetails(contractAddress: string, blockchainAddress: str
     name,
     symbol,
     price: Math.round(Number(rawPrice) / 1e18),       // Convert price from wei and round
-    quantity: Math.round(Number(rawBalance) / 1e21), // Convert balance from wei, scale down by 1000, and round
-    co2: Math.round(Number(rawCo2) / 1e18 / 1000),   // Convert footprint from wei, divide by 1000, and round
+    quantity: (Number(rawBalance) / 1e18 / 1000).toFixed(2), // Convert balance from wei, scale down by 1000, and round
+    co2: (Number(rawCo2) / 1e18 / 1000).toFixed(2),   // Convert footprint from wei, divide by 1000, and round
   };
 }

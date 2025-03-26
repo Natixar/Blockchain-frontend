@@ -94,6 +94,7 @@ async function applyRouteBasedHeaders(pathname: string, headers: Headers, userId
       '/transactions/create/createPackage'
     ];
     const routesRequiringBlockchainAddress = [
+      '/product/tnx-in',
       '/product/getProducts',
       /^\/product\/list\/[^/]+\/details$/, // dynamic path as regex
       /^\/transactions\/getTransactions(\?blockchainAddress=[^&]+)?$/ // request param as regex
