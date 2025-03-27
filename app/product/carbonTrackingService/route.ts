@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { FactorySingleton } from '@/app/blockchain/src';
+import { Product } from '../Tproduct';
+import qrcode from 'qrcode-generator';
 
 interface Transaction {
 txHash?: string;
@@ -16,6 +18,7 @@ interface RequestBody {
 mineralAddress: string;
 hash: string;
 groups: Array<any>;
+product: Product;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -24,7 +27,7 @@ try {
 // 1. Retrieve and validate input parameters
 //----------------------------------------------------------------------
 const body: RequestBody = await request.json();
-const { mineralAddress, hash, groups } = body;
+const { mineralAddress, hash, groups, product } = body;
 
 if (!mineralAddress || !mineralAddress.startsWith('0x')) {
   return NextResponse.json(
@@ -41,6 +44,12 @@ if (!hash || !hash.startsWith('0x')) {
 if (!groups) {
   return NextResponse.json(
     { error: 'Missing or invalid groups' },
+    { status: 400 }
+  );
+}
+if (!product) {
+  return NextResponse.json(
+    { error: 'Missing or invalid product' },
     { status: 400 }
   );
 }
@@ -78,18 +87,14 @@ const formatValue = (val?: string): string => {
 //----------------------------------------------------------------------
 // 4. Summaries & metrics
 //----------------------------------------------------------------------
-const totalCO2 = transactions
-  .reduce((sum, tx) => sum + (tx.footprintValue ? Number(tx.footprintValue) : 0), 0)
-  .toFixed(2);
 
-const latestQuantity = transactions.length > 0 ? formatValue(transactions[0].value) : '0.00';
 const origin =
   transactions.length > 0
-    ? transactions[transactions.length - 1].from
+    ? transactions[0].from
     : 'Not Available';
 const destination =
   transactions.length > 0
-    ? transactions[0].to
+    ? transactions[transactions.length - 1].to
     : 'Not Available';
 
 //----------------------------------------------------------------------
@@ -156,7 +161,7 @@ doc.rect(0, 0, PAGE_WIDTH, HEADER_HEIGHT, 'F');
 setColor(colors.white, 'text');
 doc.setFont(fonts.heading, 'bold');
 doc.setFontSize(16);
-doc.text('CARBON TRACKING CERTIFICATE', PAGE_WIDTH / 2, HEADER_HEIGHT / 2 + 4, { align: 'center' });
+doc.text('NATIXAR - CARBON TRACKING CERTIFICATE', PAGE_WIDTH / 2, HEADER_HEIGHT / 2 + 4, { align: 'center' });
 // Move vertical pointer
 yPos = HEADER_HEIGHT + 10;
 
@@ -181,7 +186,7 @@ doc.text(lines, MARGIN_LEFT, yPos);
 yPos += lines.length * 5 + 10;
 
 // -- (E) Summary Box (Origin, Destination, Steps, Quantity, CO2)
-const SUMMARY_BOX_HEIGHT = 65;
+const SUMMARY_BOX_HEIGHT = 67;
 setColor(colors.light, 'fill');
 setColor(colors.border, 'draw');
 doc.roundedRect(MARGIN_LEFT, yPos, CONTENT_WIDTH, SUMMARY_BOX_HEIGHT, 3, 3, 'FD');
@@ -205,9 +210,9 @@ boxY += 5;
 
 doc.setFont(fonts.mono, 'normal');
 doc.setFontSize(8);
-const addressLines = doc.splitTextToSize(mineralAddress, (CONTENT_WIDTH / 2) - padding * 2);
+const addressLines = doc.splitTextToSize(`${product.name} (${product.symbol})\n${product.address}`, (CONTENT_WIDTH / 2) - padding * 2);
 doc.text(addressLines, col1X, boxY);
-doc.text(latestQuantity, col2X, boxY);
+doc.text(product.quantity.toString(), col2X, boxY);
 boxY += 15;
 
 // Row 2: Origin / Steps
@@ -235,11 +240,81 @@ doc.setFont(fonts.mono, 'normal');
 doc.setFontSize(8);
 const destLines = doc.splitTextToSize(formatAddress(destination), (CONTENT_WIDTH / 2) - padding * 2);
 doc.text(destLines, col1X, boxY);
-doc.text(`${totalCO2}`, col2X, boxY);
+doc.text(`${product.co2}`, col2X, boxY);
 boxY += 10;
 
 // Move Y below box
 yPos += SUMMARY_BOX_HEIGHT + 10;
+
+
+// qrcode
+// -- Add QR Code
+const QR_SIZE = 60; // Size of QR code in mm
+const QR_Y_POSITION = PAGE_HEIGHT * 0.72; // Position at about 2/3 down the page
+
+// Generate QR code with contract info - using higher type (8 instead of 6)
+// Type 8 can hold more data
+const qr = qrcode(8, 'M'); // Increased from type 6 to type 8 for more capacity
+
+// Reduce the amount of data if needed - create a shorter URL or identifier
+// Option 1: Full data (might be too much)
+// qr.addData(`Contract: ${product.address}\nProduct: ${product.name} (${product.symbol})\nQuantity: ${product.quantity} tons\nCO2: ${product.co2} tons`);
+
+// Option 2: Reduced data - just the essential contract info
+qr.addData(`${product.address}`);
+
+qr.make();
+
+// Draw QR code background with rounded corners and shadow
+const qrX = (PAGE_WIDTH - QR_SIZE) / 2; // Center horizontally
+const qrY = QR_Y_POSITION - QR_SIZE / 2; // Position at 2/3 down
+
+// Add shadow effect
+setColor('#DDDDDD', 'fill');
+doc.roundedRect(qrX + 2, qrY + 2, QR_SIZE, QR_SIZE, 4, 4, 'F');
+
+// Add white background
+setColor(colors.white, 'fill');
+setColor(colors.border, 'draw');
+doc.roundedRect(qrX, qrY, QR_SIZE, QR_SIZE, 4, 4, 'FD');
+
+// Convert QR code to data URL and add to PDF
+const qrImage = qr.createDataURL(4);
+doc.addImage(qrImage, 'PNG', qrX + 5, qrY + 5, QR_SIZE - 10, QR_SIZE - 10);
+
+// Add decorative elements around QR code
+setColor(colors.primary, 'draw');
+doc.setLineWidth(1);
+
+// Draw stylish corners
+const cornerSize = 8;
+// Top-left corner
+doc.line(qrX, qrY + cornerSize, qrX, qrY);
+doc.line(qrX, qrY, qrX + cornerSize, qrY);
+// Top-right corner
+doc.line(qrX + QR_SIZE - cornerSize, qrY, qrX + QR_SIZE, qrY);
+doc.line(qrX + QR_SIZE, qrY, qrX + QR_SIZE, qrY + cornerSize);
+// Bottom-left corner
+doc.line(qrX, qrY + QR_SIZE - cornerSize, qrX, qrY + QR_SIZE);
+doc.line(qrX, qrY + QR_SIZE, qrX + cornerSize, qrY + QR_SIZE);
+// Bottom-right corner
+doc.line(qrX + QR_SIZE - cornerSize, qrY + QR_SIZE, qrX + QR_SIZE, qrY + QR_SIZE);
+doc.line(qrX + QR_SIZE, qrY + QR_SIZE, qrX + QR_SIZE, qrY + QR_SIZE - cornerSize);
+
+// Add label above QR code
+setColor(colors.primary, 'text');
+doc.setFont(fonts.heading, 'bold');
+doc.setFontSize(10);
+doc.text('SCAN FOR BLOCKCHAIN VERIFICATION', PAGE_WIDTH / 2, qrY - 4, { align: 'center' });
+
+// Add label below QR code with the contract details
+setColor(colors.textLight, 'text');
+doc.setFont(fonts.body, 'normal');
+doc.setFontSize(8);
+doc.text('Scan to verify contract authenticity', PAGE_WIDTH / 2, qrY + QR_SIZE + 6, { align: 'center' });
+
+// qrcode
+
 
 // -- (F) Page 1 Footer
 const footerY = PAGE_HEIGHT - FOOTER_HEIGHT;
@@ -248,7 +323,7 @@ doc.rect(0, footerY, PAGE_WIDTH, FOOTER_HEIGHT, 'F');
 setColor(colors.white, 'text');
 doc.setFont(fonts.body, 'normal');
 doc.setFontSize(9);
-doc.text('Blockchain-Verified Carbon Certificate', MARGIN_LEFT, footerY + 12);
+doc.text('Natixar Blockchain-Verified Carbon Certificate', MARGIN_LEFT, footerY + 12);
 // Generation Date: Right
 doc.setFontSize(9);
 doc.text(
@@ -462,7 +537,7 @@ doc.rect(0, footerY, PAGE_WIDTH, FOOTER_HEIGHT, 'F');
 setColor(colors.white, 'text');
 doc.setFont(fonts.body, 'normal');
 doc.setFontSize(9);
-doc.text('Blockchain-Verified Carbon Certificate', MARGIN_LEFT, footerY + 12);
+doc.text('Natixar Blockchain-Verified Carbon Certificate', MARGIN_LEFT, footerY + 12);
 // Generation Date: Right
 doc.setFontSize(9);
 doc.text(

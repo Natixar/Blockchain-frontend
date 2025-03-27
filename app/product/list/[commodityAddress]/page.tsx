@@ -58,8 +58,7 @@ async function fetchTokenTransactions(tokenAddress: string): Promise<Transaction
   }
 }
 
-async function generateCarbonTrackingPDF(mineralAddress: string, hash: string, groups: Array<any>): Promise<Blob> {
-  
+async function generateCarbonTrackingPDF(mineralAddress: string, hash: string, groups: Array<any>, product: Product): Promise<Blob> {
   try {
     const response = await fetch('/product/carbonTrackingService', {
       method: 'POST',
@@ -69,7 +68,8 @@ async function generateCarbonTrackingPDF(mineralAddress: string, hash: string, g
       body: JSON.stringify({
         mineralAddress,
         hash,
-        groups
+        groups,
+        product
       }),
     });
 
@@ -190,12 +190,12 @@ export default function ProductDetailPage(props: { params: Promise<{ commodityAd
     }
   };
 
-  const handleDownloadPDF = async (transaction: any, index: number, groups: Array<any>) => {
+  const handleDownloadPDF = async (transaction: any, index: number, groups: Array<any>, product: Product) => {
     if (!product) return;
     
     try {
       setGeneratingPDF(`${transaction.timeStamp}-${index}`); // Set which transaction is generating PDF
-      const pdfBlob = await generateCarbonTrackingPDF(product.address, transaction.hash, groups);
+      const pdfBlob = await generateCarbonTrackingPDF(product.address, transaction.hash, groups, product);
       
       // Create a download link and trigger click
       const url = window.URL.createObjectURL(pdfBlob);
@@ -254,7 +254,7 @@ export default function ProductDetailPage(props: { params: Promise<{ commodityAd
                     </div>
                     <div className="mt-3 flex justify-end">
                       <button
-                        onClick={() => handleDownloadPDF(tx, index, groups)}
+                        onClick={() => handleDownloadPDF(tx, index, groups, product)}
                         disabled={generatingPDF === `${tx.timeStamp}-${index}`}
                         className={`flex items-center px-4 py-2 rounded-md text-white 
                           ${generatingPDF === `${tx.timeStamp}-${index}` 
