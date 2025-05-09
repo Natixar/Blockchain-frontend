@@ -14,3 +14,5 @@ public/sw*
 public/swe-worker*
 # Typedoc
 docs/
+# Docker build space
+.docker/buildx
