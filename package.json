@@ -34,7 +34,7 @@
     "@web3-kms-signer/hd-wallets": "^1.0.9",
     "ethers": "^6.13",
     "jsqr": "^1.4",
-    "next": "^15.0",
+    "next": ">=15.2.3 <16",
     "nodemailer": "^6.9",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
@@ -51,12 +51,13 @@
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
     "eslint": "^9",
-    "eslint-config-next": "^15.0",
+    "eslint-config-next": "^15.2",
+    "next": ">=15.2.3 <16",
     "postcss": "^8",
     "serwist": "^9.0",
     "tailwindcss": "^3.4",
     "typedoc": "^0.27",
-    "typescript": "^5"
+    "typescript": "^5.4"
   },
   "overrides": {
     "@types/react": "npm:types-react@rc",
