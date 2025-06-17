@@ -31,20 +31,25 @@ export default function UnifiedProductListPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const products = await fetchProducts();
-      setProducts(products);
 
-      const quantities = products.map((product) => product.quantity);
-      const co2Values = products.map((product) => product.co2 || 0);
+    try {
+        const products = await fetchProducts();
+        setProducts(products);
 
-      // Calculate min and max for quantity and CO2
-      const minQuantity = Math.min(...quantities);
-      const maxQuantity = Math.max(...quantities);
-      const minCO2 = Math.min(...co2Values);
-      const maxCO2 = Math.max(...co2Values);
+        const quantities = products.map((product) => product.quantity);
+        const co2Values = products.map((product) => product.co2 || 0);
 
-      setQuantityRange([minQuantity, maxQuantity]);
-      setCO2Range([minCO2, maxCO2]);
+        // Calculate min and max for quantity and CO2
+        const minQuantity = Math.min(...quantities);
+        const maxQuantity = Math.max(...quantities);
+        const minCO2 = Math.min(...co2Values);
+        const maxCO2 = Math.max(...co2Values);
+
+        setQuantityRange([minQuantity, maxQuantity]);
+        setCO2Range([minCO2, maxCO2]);
+      } catch (error) {
+        console.log("fetchProducts failed in UnifiedProductListPage");
+      }
     };
     fetchData();
   }, []);
