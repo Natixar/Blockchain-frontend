@@ -60,7 +60,7 @@ export default function CreateTransaction() {
         const data = await response.json();
         setProducts(data);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.log('Error fetching products:', error);
         setErrorMessage('Failed to fetch products');
       }
     }
@@ -74,7 +74,7 @@ export default function CreateTransaction() {
         const data = await groupResponse.json();
         setGroups(data);
       } catch (error) {
-        console.error('Error fetching groups:', error);
+        console.log('Error fetching groups:', error);
         setErrorMessage('Failed to fetch groups');
       }
     }

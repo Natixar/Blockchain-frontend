@@ -43,7 +43,7 @@ export default function MintingForm() {
           setSelectedMineralAddress(data[0].address);
         }
       } catch (error) {
-        console.error('Failed to fetch minerals:', error);
+        console.log('Failed to fetch minerals:', error);
       }
     }
     

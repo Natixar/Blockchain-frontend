@@ -20,7 +20,7 @@ async function fetchTransactions(): Promise<any> {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching transactions:', error);
+    console.log('Error fetching transactions:', error);
   }
 }
 
