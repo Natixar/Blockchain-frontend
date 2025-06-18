@@ -118,13 +118,14 @@ export class SmartContractExec {
                 throw new Error('Unauthorized');
             }
             if (!response.ok) {
-                throw new Error('Failed to sign transaction');
+                const message = `Error when accessing smart contract: ${response.status} ${response.statusText}`;
+                throw new Error(message);
             }
 
             const json = await response.json() as T;
             return json;
         } catch (error) {
-            console.error('Error signing transaction:', error);
+            console.log(error);
             throw error;
         }
     }
