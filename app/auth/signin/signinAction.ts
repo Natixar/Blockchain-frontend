@@ -62,10 +62,44 @@ export async function handleSignin(formData: FormData) {
 		const userData: UserData = await userResponse.json();
 		const { token, refreshToken, user } = userData;
 
-		if (!token || !refreshToken || !user?.memberships?.[0]?.groupId) {
-			throw new Error('Missing essential data in login response');
+		// if (!token || !refreshToken || !user?.memberships?.[0]?.groupId) {
+		// 	throw new Error('Missing essential data in login response');
+		// }
+		// Test 1: Validate token
+		if (!token) {
+			const errorMessage = 'Authentication token is missing in login response.';
+			console.log(`Login Validation Error: ${errorMessage}`);
+			throw new Error(errorMessage);
 		}
 
+		// Test 2: Validate refreshToken
+		if (!refreshToken) {
+			const errorMessage = 'Refresh token is missing in login response.';
+			console.log(`Login Validation Error: ${errorMessage}`);
+			throw new Error(errorMessage);
+		}
+
+		// Test 3: Validate user object
+		if (!user) {
+			const errorMessage = 'User object is missing in login response.';
+			console.log(`Login Validation Error: ${errorMessage}`);
+			throw new Error(errorMessage);
+		}
+
+		// Test 4: Validate user memberships and groupId (user object is confirmed to exist)
+		// This covers the logic of !user.memberships?.[0]?.groupId
+		if (!user.memberships || user.memberships.length === 0 || !user.memberships[0]?.groupId) {
+			let errorMessage: string;
+			if (!user.memberships || user.memberships.length === 0) {
+				errorMessage = 'User memberships array is missing or empty in login response for user : ' + user;
+			} else {
+				// At this point, user.memberships exists and is not empty.
+				// The failure must be due to missing groupId on the first membership.
+				errorMessage = 'Group ID is missing in the first user membership.';
+			}
+			console.log(`Login Validation Error: ${errorMessage}`);
+			throw new Error(errorMessage);
+		}
 		const groupResponse = await fetch(`${process.env.FUSIONAUTH_ISSUER}/api/group/${user.memberships[0].groupId}`, {
 			method: 'GET',
 			headers: {
@@ -109,7 +143,7 @@ export async function handleSignin(formData: FormData) {
 		console.log('redirectUrl', redirectUrl)
 
 	} catch (error) {
-		console.error('Login process encountered an error:', error);
+		console.log('Login process encountered an error:', error);
 		redirectUrl = '/auth/signin?error=invalid-credentials';
 	}
 	// As per the Next.js official documentation: "redirect internally throws an error so it should be called outside of try/catch blocks."
